@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -27,6 +28,8 @@ public class GameManager : MonoBehaviour
     public TMP_Text coinsText;
     public TMP_Text cpsText;
 
+    public InputActionReference getCoinInput;
+
     void Awake()
     {
         Instance = this;
@@ -51,7 +54,7 @@ public class GameManager : MonoBehaviour
                 AddCoins(payout);
         }
         // for testing
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (getCoinInput.action.triggered)
             AddCoins(50);
     }
 

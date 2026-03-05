@@ -1,14 +1,17 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CannonController : MonoBehaviour
 {
     public Projectile projectilePrefab;
     public float fireCooldown = 0.15f;
     float nextFireTime;
+    public InputActionReference mouseFire;
+    public InputActionReference mouseLook;
 
     void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (mouseFire.action.triggered)
         {
             TryFire();
         }
@@ -19,10 +22,10 @@ public class CannonController : MonoBehaviour
         if (Time.time < nextFireTime) return;
         nextFireTime = Time.time + fireCooldown;
 
-        Vector3 mouseTarget = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseTarget.z = 0f;
+        Debug.Log(mouseLook.action.ReadValue<Vector2>());
+        Vector2 mouseTarget = Camera.main.ScreenToWorldPoint(mouseLook.action.ReadValue<Vector2>());
 
-        Vector3 origin = transform.position;
+        Vector2 origin = transform.position;
         Vector2 dir = (mouseTarget - origin);
 
         if (dir.sqrMagnitude < 0.0001f) return;
