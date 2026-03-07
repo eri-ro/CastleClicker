@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -6539531379720619826}
   - component: {fileID: 1433905470741516795}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: EnemyBasic
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   speed: 1.5
-  hp: 3
+  hp: 2
   coinReward: 1
   burnDps: 0
   target: {fileID: 0}

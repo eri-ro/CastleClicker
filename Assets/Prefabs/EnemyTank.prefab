@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -6539531379720619826}
   - component: {fileID: 1433905470741516795}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: EnemyTank
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -105,12 +105,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f5cb952ad9bc4362a4e3e08ad30d881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  speed: 1.5
-  hp: 3
-  coinReward: 1
+  speed: 0.9
+  hp: 10
+  coinReward: 4
   burnDps: 0
   target: {fileID: 0}
-  castleDamage: 1
+  castleDamage: 4
 --- !u!58 &-6539531379720619826
 CircleCollider2D:
   m_ObjectHideFlags: 0

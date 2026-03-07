@@ -6,27 +6,44 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     public int coins = 0;
-    public float coinsPerSecond = 0f;
+    public float coinsPerSecond = 1f;
     float cpsTimer;
 
+    [Header("Econ")]
     public int cpsLevel = 0;
     public int cpsBaseCost = 25;
     public float cpsCostGrowth = 1.17f;
     public float cpsGainPerLevel = 1f;
 
+    [Header("DPS")]
     public int damagePerShot = 1;
     public int damageLevel = 0;
     public int damageBaseCost = 10;
     public float damageCostGrowth = 1.15f;
 
+    [Header("Turrets")]
     public Turret turretPrefab;
-    public Transform castleTransform; // drag your castle here
+    public Transform castleTransform;
     public int turretCount = 0;
     public int turretBaseCost = 50;
     public float turretCostGrowth = 1.25f;
 
+    [Header("Moat")]
+    public Moat moatPrefab;
+    public bool moatPurchased = false;
+    public int moatCost = 150;
+    public int lavaMoatCost = 300;
+    public bool lavaMoatPurchased = false;
+    Moat activeMoat;
+
+    [Header("Castle")]
+    public int maxCastleHealth = 100;
+    public int currentCastleHealth;
+    public bool gameOver = false;
+
     public TMP_Text coinsText;
     public TMP_Text cpsText;
+    public TMP_Text castleHealthText;
 
     public InputActionReference getCoinInput;
 
@@ -37,6 +54,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        currentCastleHealth = maxCastleHealth;
         UpdateUI();
     }
 
@@ -78,6 +96,7 @@ public class GameManager : MonoBehaviour
     {
         coinsText.text = "Coins: " + coins.ToString();
         cpsText.text = "CPS: " + coinsPerSecond.ToString("0.##");
+        castleHealthText.text = "Castle HP: " + currentCastleHealth + " / " + maxCastleHealth;
     }
 
     public int GetDamageUpgradeCost()
@@ -148,5 +167,64 @@ public class GameManager : MonoBehaviour
         Vector3 spawnPos = center + offset;
 
         Turret turret = Instantiate(turretPrefab, spawnPos, Quaternion.identity, castleTransform);
+    }
+
+    public bool TryBuyMoat()
+    {
+        if (moatPurchased) return false;
+
+        if (!SpendCoins(moatCost))
+            return false;
+
+        moatPurchased = true;
+        SpawnMoat();
+        return true;
+    }
+
+    void SpawnMoat()
+    {
+        Vector3 pos = castleTransform.position;
+        activeMoat = Instantiate(moatPrefab, pos, Quaternion.identity);
+        activeMoat.center = castleTransform;
+
+        activeMoat.moatType = Moat.MoatType.Water;
+        activeMoat.ApplyVisuals();
+    }
+
+    public bool TryUpgradeToLavaMoat()
+    {
+        if (!moatPurchased) return false;
+        if (lavaMoatPurchased) return false;
+
+        if (!SpendCoins(lavaMoatCost))
+            return false;
+
+        lavaMoatPurchased = true;
+
+        activeMoat.moatType = Moat.MoatType.Lava;
+        activeMoat.ApplyVisuals();
+
+        return true;
+    }
+
+    public void DamageCastle(int amount)
+    {
+        if (gameOver) return;
+
+        currentCastleHealth -= amount;
+        currentCastleHealth = Mathf.Max(0, currentCastleHealth);
+
+        UpdateUI();
+
+        if (currentCastleHealth <= 0)
+        {
+            GameOver();
+        }
+    }
+
+    void GameOver()
+    {
+        gameOver = true;
+        Debug.Log("Game Over");
     }
 }

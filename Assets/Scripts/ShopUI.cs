@@ -11,6 +11,8 @@ public class ShopUI : MonoBehaviour
     public TMP_Text cpsButtonText;
     public Button turretButton;
     public TMP_Text turretButtonText;
+    public Button moatButton;
+    public TMP_Text moatButtonText;
 
     void Start()
     {
@@ -41,7 +43,24 @@ public class ShopUI : MonoBehaviour
     {
         game.TryBuyTurret();
         Refresh();
-}
+    }
+
+    public void OnClick_BuyMoat()
+    {
+        game.TryBuyMoat();
+        Refresh();
+    }
+
+    public void OnClick_MoatButton()
+    {
+        if (!game.moatPurchased)
+            game.TryBuyMoat();
+        else
+            game.TryUpgradeToLavaMoat();
+
+        Refresh();
+    }
+
     public void Refresh()
     {
         // Damage
@@ -58,6 +77,21 @@ public class ShopUI : MonoBehaviour
         int turretCost = game.GetTurretCost();
         turretButtonText.text = "Buy Turret\nCost: " + turretCost;
         turretButton.interactable = (game.coins >= turretCost);
+
+        // Moat
+        if (!game.moatPurchased)
+            moatButtonText.text = "Buy Moat\nCost: " + game.moatCost;
+        else if (!game.lavaMoatPurchased)
+            moatButtonText.text = "Upgrade: Lava Moat\nCost: " + game.lavaMoatCost;
+        else
+            moatButtonText.text = "Lava Moat\nOwned";
+
+        if (!game.moatPurchased)
+            moatButton.interactable = (game.coins >= game.moatCost);
+        else if (!game.lavaMoatPurchased)
+            moatButton.interactable = (game.coins >= game.lavaMoatCost);
+        else
+            moatButton.interactable = false;        
     }
 
     void Update()
