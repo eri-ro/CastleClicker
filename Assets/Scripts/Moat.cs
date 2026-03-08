@@ -35,8 +35,7 @@ public class Moat : MonoBehaviour
 
     void Start()
     {
-        if (center != null)
-            transform.position = center.position;
+        transform.position = center.position;
 
         ApplyVisuals();
         DrawCircleAtRadius((innerRadius + outerRadius) * 0.5f);
@@ -70,7 +69,13 @@ public class Moat : MonoBehaviour
                     e.ResetSpeedMultiplier();
 
                 if (moatType == MoatType.Lava && !e.ignoresMoatBurn)
-                    e.SetBurnDps(lavaBurnDps);
+                {
+                    double burn = lavaBurnDps;
+
+                    burn = GameManager.Instance.lavaMoatDps;
+
+                    e.SetBurnDps((float)burn);
+                }
                 else
                     e.SetBurnDps(0f);
             }

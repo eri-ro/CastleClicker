@@ -25,8 +25,7 @@ public class Turret : MonoBehaviour
         Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity);
 
         int dmg = 1;
-        if (GameManager.Instance != null)
-            dmg = GameManager.Instance.damagePerShot;
+        dmg = Mathf.Max(1, Mathf.RoundToInt((float)GameManager.Instance.turretDamage));
 
         projectile.Initialize(dir, dmg);
     }

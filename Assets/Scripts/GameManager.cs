@@ -5,47 +5,66 @@ using UnityEngine.InputSystem;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-    public int coins = 0;
-    public float coinsPerSecond = 1f;
-    float cpsTimer;
 
-    [Header("Econ")]
+    [Header("Economy")]
+    public double coins = 0;
+    public double coinsPerSecond = 0;
+
+    [Header("Castle Health")]
+    public int maxCastleHealth = 100;
+    public int currentCastleHealth;
+    public bool gameOver = false;
+
+    [Header("Combat Stats")]
+    public double castleDamage = 1;
+    public double turretDamage = 1;
+    public double lavaMoatDps = 5;
+
+    [Header("Damage Upgrade")]
+    public int castleDamageLevel = 0;
+    public double castleDamageBaseCost = 10;
+    public double castleDamageCostGrowth = 1.15;
+
+    [Header("Turret Damage Upgrade")]
+    public int turretDamageLevel = 0;
+    public double turretDamageBaseCost = 25;
+    public double turretDamageCostGrowth = 1.18;
+
+    [Header("Lava Moat Upgrade")]
+    public int lavaMoatLevel = 0;
+    public double lavaMoatBaseCost = 100;
+    public double lavaMoatCostGrowth = 1.22;
+    public double lavaMoatGrowth = 1.25;
+
+    [Header("CPS Upgrade")]
     public int cpsLevel = 0;
-    public int cpsBaseCost = 25;
-    public float cpsCostGrowth = 1.17f;
-    public float cpsGainPerLevel = 1f;
-
-    [Header("DPS")]
-    public int damagePerShot = 1;
-    public int damageLevel = 0;
-    public int damageBaseCost = 10;
-    public float damageCostGrowth = 1.15f;
+    public double cpsBaseCost = 20;
+    public double cpsCostGrowth = 1.17;
+    public double cpsGainPerLevel = 1;
 
     [Header("Turrets")]
     public Turret turretPrefab;
     public Transform castleTransform;
     public int turretCount = 0;
-    public int turretBaseCost = 50;
-    public float turretCostGrowth = 1.25f;
+    public double turretBaseCost = 50;
+    public double turretCostGrowth = 1.25;
 
     [Header("Moat")]
     public Moat moatPrefab;
     public bool moatPurchased = false;
-    public int moatCost = 150;
-    public int lavaMoatCost = 300;
     public bool lavaMoatPurchased = false;
+    public double moatCost = 150;
+    public double lavaMoatUnlockCost = 300;
     Moat activeMoat;
 
-    [Header("Castle")]
-    public int maxCastleHealth = 100;
-    public int currentCastleHealth;
-    public bool gameOver = false;
-
+    [Header("UI")]
     public TMP_Text coinsText;
     public TMP_Text cpsText;
     public TMP_Text castleHealthText;
 
-    public InputActionReference getCoinInput;
+    float cpsTimer;
+
+    public InputActionReference getCoinInput; // debug cheat
 
     void Awake()
     {
@@ -67,22 +86,21 @@ public class GameManager : MonoBehaviour
         {
             cpsTimer -= 1f;
 
-            int payout = Mathf.FloorToInt(coinsPerSecond);
-            if (payout > 0)
-                AddCoins(payout);
+            if (coinsPerSecond > 0)
+                AddCoins(coinsPerSecond);
         }
         // for testing
         if (getCoinInput.action.triggered)
             AddCoins(50);
     }
 
-    public void AddCoins(int amount)
+    public void AddCoins(double amount)
     {
         coins += amount;
         UpdateUI();
     }
 
-    public bool SpendCoins(int cost)
+    public bool SpendCoins(double cost)
     {
         if (coins < cost)
             return false;
@@ -94,60 +112,67 @@ public class GameManager : MonoBehaviour
 
     void UpdateUI()
     {
-        coinsText.text = "Coins: " + coins.ToString();
+        coinsText.text = "Coins: " + Mathf.FloorToInt((float)coins).ToString();
         cpsText.text = "CPS: " + coinsPerSecond.ToString("0.##");
         castleHealthText.text = "Castle HP: " + currentCastleHealth + " / " + maxCastleHealth;
     }
 
-    public int GetDamageUpgradeCost()
+    public double GetCastleDamageUpgradeCost()
     {
-        // cost = baseCost * growth^level
-        float costF = damageBaseCost * Mathf.Pow(damageCostGrowth, damageLevel);
-        int cost = Mathf.RoundToInt(costF);
-        return Mathf.Max(1, cost);
+        return castleDamageBaseCost * System.Math.Pow(castleDamageCostGrowth, castleDamageLevel);
     }
 
-    public bool TryBuyDamageUpgrade()
+    public bool TryBuyCastleDamageUpgrade()
     {
-        int cost = GetDamageUpgradeCost();
+        double cost = GetCastleDamageUpgradeCost();
         if (!SpendCoins(cost))
             return false;
 
-        damageLevel += 1;
-        damagePerShot += 1;
+        castleDamageLevel++;
+        castleDamage += 1;
         return true;
     }
 
-    public int GetCpsUpgradeCost()
+    public double GetTurretDamageUpgradeCost()
     {
-        float costF = cpsBaseCost * Mathf.Pow(cpsCostGrowth, cpsLevel);
-        int cost = Mathf.RoundToInt(costF);
-        return Mathf.Max(1, cost);
+        return turretDamageBaseCost * System.Math.Pow(turretDamageCostGrowth, turretDamageLevel);
+    }
+
+    public bool TryBuyTurretDamageUpgrade()
+    {
+        double cost = GetTurretDamageUpgradeCost();
+        if (!SpendCoins(cost))
+            return false;
+
+        turretDamageLevel++;
+        turretDamage += 1;
+        return true;
+    }
+
+    public double GetCpsUpgradeCost()
+    {
+        return cpsBaseCost * System.Math.Pow(cpsCostGrowth, cpsLevel);
     }
 
     public bool TryBuyCpsUpgrade()
     {
-        int cost = GetCpsUpgradeCost();
-        if (!SpendCoins(cost))
-            return false;
+        double cost = GetCpsUpgradeCost();
+        if (!SpendCoins(cost)) return false;
 
         cpsLevel += 1;
         coinsPerSecond += cpsGainPerLevel;
         return true;
     }
 
-    public int GetTurretCost()
+    public double GetTurretCost()
     {
-        float costF = turretBaseCost * Mathf.Pow(turretCostGrowth, turretCount);
-        int cost = Mathf.RoundToInt(costF);
-        return Mathf.Max(1, cost);
+        return turretBaseCost * System.Math.Pow(turretCostGrowth, turretCount); ;
     }
 
     public bool TryBuyTurret()
     {
-        int cost = GetTurretCost();
-        if (!SpendCoins(cost))
-            return false;
+        double cost = GetTurretCost();
+        if (!SpendCoins(cost)) return false;
 
         turretCount += 1;
         SpawnTurret();
@@ -166,15 +191,13 @@ public class GameManager : MonoBehaviour
         Vector3 offset = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * radius;
         Vector3 spawnPos = center + offset;
 
-        Turret turret = Instantiate(turretPrefab, spawnPos, Quaternion.identity, castleTransform);
+        Instantiate(turretPrefab, spawnPos, Quaternion.identity);
     }
 
     public bool TryBuyMoat()
     {
         if (moatPurchased) return false;
-
-        if (!SpendCoins(moatCost))
-            return false;
+        if (!SpendCoins(moatCost)) return false;
 
         moatPurchased = true;
         SpawnMoat();
@@ -195,9 +218,7 @@ public class GameManager : MonoBehaviour
     {
         if (!moatPurchased) return false;
         if (lavaMoatPurchased) return false;
-
-        if (!SpendCoins(lavaMoatCost))
-            return false;
+        if (!SpendCoins(lavaMoatUnlockCost)) return false;
 
         lavaMoatPurchased = true;
 
@@ -205,6 +226,24 @@ public class GameManager : MonoBehaviour
         activeMoat.ApplyVisuals();
 
         return true;
+    }
+
+    public bool TryBuyLavaMoatDamageUpgrade()
+    {
+        if (!lavaMoatPurchased) return false;
+
+        double cost = GetLavaMoatUpgradeCost();
+        if (!SpendCoins(cost))
+            return false;
+
+        lavaMoatLevel++;
+        lavaMoatDps *= lavaMoatGrowth;
+        return true;
+    }
+
+    public double GetLavaMoatUpgradeCost()
+    {
+        return lavaMoatBaseCost * System.Math.Pow(lavaMoatCostGrowth, lavaMoatLevel);
     }
 
     public void DamageCastle(int amount)
@@ -217,14 +256,20 @@ public class GameManager : MonoBehaviour
         UpdateUI();
 
         if (currentCastleHealth <= 0)
-        {
             GameOver();
-        }
     }
 
     void GameOver()
     {
         gameOver = true;
         Debug.Log("Game Over");
+    }
+
+    public string FormatNumber(double value)
+    {
+        if (value < 1000)
+            return Mathf.FloorToInt((float)value).ToString();
+
+        return value.ToString("0.###e0");
     }
 }

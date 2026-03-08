@@ -8,7 +8,7 @@ public class Enemy : MonoBehaviour
 
     [Header("Combat")]
     public int hp = 3;
-    public int coinReward = 1;
+    public double coinReward = 1;
     public int castleDamage = 1;
 
     [Header("Status Effects")]

@@ -22,7 +22,6 @@ public class CannonController : MonoBehaviour
         if (Time.time < nextFireTime) return;
         nextFireTime = Time.time + fireCooldown;
 
-        Debug.Log(mouseLook.action.ReadValue<Vector2>());
         Vector2 mouseTarget = Camera.main.ScreenToWorldPoint(mouseLook.action.ReadValue<Vector2>());
 
         Vector2 origin = transform.position;
@@ -33,8 +32,7 @@ public class CannonController : MonoBehaviour
         Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity);
 
         int dmg = 1;
-        if (GameManager.Instance != null)
-            dmg = GameManager.Instance.damagePerShot;
+        dmg = Mathf.Max(1, Mathf.RoundToInt((float)GameManager.Instance.castleDamage));
 
         projectile.Initialize(dir, dmg);
     }
