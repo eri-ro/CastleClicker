@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
@@ -10,50 +13,131 @@ public class EnemySpawner : MonoBehaviour
     [Header("Target")]
     public Transform castleTarget;
 
-    [Header("Spawn Settings")]
-    public float spawnInterval = 1.0f;
+    [Header("Endless Spawn")]
+    public float baseSpawnInterval = 1.0f;
     public float spawnRadius = 8f;
 
-    float timer;
+    [Header("Massive Wave")]
+    public int massiveWaveSize = 15;
+    public float timeBetweenMassiveWaves = 30f;
+    public float timeBetweenWaveSpawns = 0.15f;
 
-    [Header("Progression")]
+    [Header("Unlock Times")]
     public float fastUnlockTime = 30f;
     public float tankUnlockTime = 90f;
-
-    float elapsedTime = 0f;
 
     [Header("Scaling")]
     public float hpMultiplier = 1f;
     public float hpGrowthRate = 0.15f;
     public float scalingInterval = 30f;
 
+    [Header("Wave Rewards")]
+    public double waveClearReward = 25;
+    public double waveClearRewardGrowth = 1.25;
+
+    [Header("Wave UI")]
+    public TMP_Text waveStatusText;
+    public float clearedMessageDuration = 2f;
+
+    float clearedMessageTimer = 0f;
+
+    bool waveRewardGranted = false;
+    bool waveActive = false;
+
+    float spawnTimer = 0f;
+    float elapsedTime = 0f;
+    float waveTimer = 0f;
     float scalingTimer = 0f;
+
+    bool spawningMassiveWave = false;
+
+    public List<Enemy> currentWaveEnemies = new List<Enemy>();
 
     void Update()
     {
         elapsedTime += Time.deltaTime;
 
-        // progressive scaling
+        HandleScaling();
+        CleanupWaveEnemyList();
+
+        if (!spawningMassiveWave)
+        {
+            HandleEndlessSpawn();
+
+            waveTimer += Time.deltaTime;
+            if (waveTimer >= timeBetweenMassiveWaves)
+            {
+                waveTimer = 0f;
+                StartCoroutine(SpawnMassiveWave());
+            }
+        }
+
+        CheckWaveCleared();
+        UpdateWaveUI();
+    }
+
+    void HandleScaling()
+    {
         scalingTimer += Time.deltaTime;
         if (scalingTimer >= scalingInterval)
         {
             scalingTimer = 0f;
             hpMultiplier += hpGrowthRate;
-
-            // spawn acceleration
-            spawnInterval = Mathf.Max(0.25f, spawnInterval * 0.95f);
-        }
-
-        // spawn timer
-        timer += Time.deltaTime;
-        if (timer >= spawnInterval)
-        {
-            timer = 0f;
-            SpawnEnemy();
+            baseSpawnInterval = Mathf.Max(0.2f, baseSpawnInterval * 0.95f);
+            massiveWaveSize += 3;
+            waveClearReward *= waveClearRewardGrowth;
         }
     }
 
-    void SpawnEnemy()
+    void HandleEndlessSpawn()
+    {
+        spawnTimer += Time.deltaTime;
+        if (spawnTimer >= baseSpawnInterval)
+        {
+            spawnTimer = 0f;
+            SpawnSingleEnemy();
+        }
+    }
+
+    IEnumerator SpawnMassiveWave()
+    {
+        spawningMassiveWave = true;
+        waveRewardGranted = false;
+        currentWaveEnemies.Clear();
+
+        waveStatusText.text = "Massive Wave Incoming!";
+
+        yield return new WaitForSeconds(1f);
+
+        for (int i = 0; i < massiveWaveSize; i++)
+        {
+            Enemy enemy = SpawnSingleEnemy(true);
+            if (enemy != null)
+                currentWaveEnemies.Add(enemy);
+
+            yield return new WaitForSeconds(timeBetweenWaveSpawns);
+        }
+
+        CleanupWaveEnemyList();
+
+        // Mark wave active only after enemies exist
+        waveActive = currentWaveEnemies.Count > 0;
+
+        spawningMassiveWave = false;
+    }
+
+    void CleanupWaveEnemyList()
+    {
+        currentWaveEnemies.RemoveAll(enemy => enemy == null);
+    }
+
+    public int GetAliveWaveEnemyCount()
+    {
+        CleanupWaveEnemyList();
+        return currentWaveEnemies.Count;
+    }
+
+    Enemy SpawnSingleEnemy(bool isWaveEnemy = false)
     {
         Vector3 center = castleTarget.position;
 
@@ -64,24 +148,20 @@ public class EnemySpawner : MonoBehaviour
         Enemy prefab = ChooseEnemyType();
 
         Enemy enemy = Instantiate(prefab, spawnPos, Quaternion.identity);
-
         enemy.target = castleTarget;
-
-        // apply scaling
         enemy.hp = Mathf.RoundToInt(enemy.hp * hpMultiplier);
+        enemy.isMassiveWaveEnemy = isWaveEnemy;
+
+        return enemy;
     }
 
     Enemy ChooseEnemyType()
     {
         float roll = Random.value;
 
-        // only basic early game
         if (elapsedTime < fastUnlockTime)
-        {
             return basicEnemy;
-        }
 
-        // basic + fast
         if (elapsedTime < tankUnlockTime)
         {
             if (roll < 0.7f)
@@ -90,12 +170,57 @@ public class EnemySpawner : MonoBehaviour
                 return fastEnemy;
         }
 
-        // all types
         if (roll < 0.55f)
             return basicEnemy;
         else if (roll < 0.80f)
             return fastEnemy;
         else
             return tankEnemy;
+    }
+
+    void CheckWaveCleared()
+    {
+        if (!waveActive) return;
+        if (waveRewardGranted) return;
+
+        CleanupWaveEnemyList();
+
+        if (currentWaveEnemies.Count == 0)
+        {
+            waveRewardGranted = true;
+            waveActive = false;
+            clearedMessageTimer = clearedMessageDuration;
+
+            if (GameManager.Instance != null)
+                GameManager.Instance.AddCoins(waveClearReward);
+
+            if (waveStatusText != null)
+                waveStatusText.text = "Wave Cleared! +" + FormatWaveReward(waveClearReward) + " Coins";
+        }
+    }
+
+    void UpdateWaveUI()
+    {
+        if (waveActive)
+        {
+            CleanupWaveEnemyList();
+            waveStatusText.text = "Wave Enemies Left: " + currentWaveEnemies.Count;
+            return;
+        }
+
+        if (clearedMessageTimer > 0f)
+        {
+            clearedMessageTimer -= Time.deltaTime;
+            if (clearedMessageTimer <= 0f)
+                waveStatusText.text = "";
+        }
+    }
+
+    string FormatWaveReward(double value)
+    {
+        if (GameManager.Instance != null)
+            return GameManager.Instance.FormatNumber(value);
+
+        return value.ToString("0");
     }
 }

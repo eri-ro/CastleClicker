@@ -8,7 +8,10 @@ public class GameManager : MonoBehaviour
 
     [Header("Economy")]
     public double coins = 0;
-    public double coinsPerSecond = 0;
+    public double coinsPerSecond = 1;
+
+    [Header("Passive Resources")]
+    public double manaPerSecond = 1;
 
     [Header("Castle Health")]
     public int maxCastleHealth = 100;
@@ -18,9 +21,9 @@ public class GameManager : MonoBehaviour
     [Header("Combat Stats")]
     public double castleDamage = 1;
     public double turretDamage = 1;
-    public double lavaMoatDps = 5;
+    public double lavaMoatDps = 1;
 
-    [Header("Damage Upgrade")]
+    [Header("Castle Damage Upgrade")]
     public int castleDamageLevel = 0;
     public double castleDamageBaseCost = 10;
     public double castleDamageCostGrowth = 1.15;
@@ -61,10 +64,15 @@ public class GameManager : MonoBehaviour
     public TMP_Text coinsText;
     public TMP_Text cpsText;
     public TMP_Text castleHealthText;
+    public TMP_Text manaText;
+    public TMP_Text defenderText;
 
-    float cpsTimer;
+    public System.Action OnUIDataChanged;
 
-    public InputActionReference getCoinInput; // debug cheat
+    [Header("Debug")]
+    public InputActionReference getCoinInput;
+
+    float passiveTimer = 0f;
 
     void Awake()
     {
@@ -74,30 +82,45 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         currentCastleHealth = maxCastleHealth;
-        UpdateUI();
+        NotifyUIChanged();
     }
 
     void Update()
     {
-        // Add coins once per second based on coinsPerSecond
-        cpsTimer += Time.deltaTime;
+        passiveTimer += Time.deltaTime;
 
-        if (cpsTimer >= 1f)
+        if (passiveTimer >= 1f)
         {
-            cpsTimer -= 1f;
-
-            if (coinsPerSecond > 0)
-                AddCoins(coinsPerSecond);
+            passiveTimer -= 1f;
+            GainPassiveResources();
         }
-        // for testing
+
         if (getCoinInput.action.triggered)
             AddCoins(50);
+    }
+
+    void GainPassiveResources()
+    {
+        coins += coinsPerSecond;
+
+        ResourceManager.Instance.AddResource("Coins", (float)coinsPerSecond);
+        ResourceManager.Instance.AddResource("Mana", (float)manaPerSecond);
+
+        NotifyUIChanged();
+    }
+
+    void NotifyUIChanged()
+    {
+        UpdateUI();
+        OnUIDataChanged?.Invoke();
     }
 
     public void AddCoins(double amount)
     {
         coins += amount;
-        UpdateUI();
+        ResourceManager.Instance.AddResource("Coins", (float)amount);
+
+        NotifyUIChanged();
     }
 
     public bool SpendCoins(double cost)
@@ -106,15 +129,27 @@ public class GameManager : MonoBehaviour
             return false;
 
         coins -= cost;
-        UpdateUI();
+        ResourceManager.Instance.SpendResource("Coins", (float)cost);
+
         return true;
     }
 
     void UpdateUI()
     {
-        coinsText.text = "Coins: " + Mathf.FloorToInt((float)coins).ToString();
-        cpsText.text = "CPS: " + coinsPerSecond.ToString("0.##");
+        coinsText.text = "Coins: " + Mathf.FloorToInt((float)coins);
+        cpsText.text = "CPS: " + FormatNumber(coinsPerSecond);
         castleHealthText.text = "Castle HP: " + currentCastleHealth + " / " + maxCastleHealth;
+        manaText.text = "Mana: " + Mathf.FloorToInt(ResourceManager.Instance.GetResource("Mana"));
+
+        int cannons = DefenderManager.Instance.GetCount(DefenderType.CastleCannon);
+        int turrets = DefenderManager.Instance.GetCount(DefenderType.Turret);
+        int moats = DefenderManager.Instance.GetCount(DefenderType.Moat);
+
+        defenderText.text =
+            "Defenders" +
+            "\nCannon: " + cannons +
+            "\nTurrets: " + turrets +
+            "\nMoats: " + moats;
     }
 
     public double GetCastleDamageUpgradeCost()
@@ -130,6 +165,8 @@ public class GameManager : MonoBehaviour
 
         castleDamageLevel++;
         castleDamage += 1;
+
+        NotifyUIChanged();
         return true;
     }
 
@@ -146,6 +183,8 @@ public class GameManager : MonoBehaviour
 
         turretDamageLevel++;
         turretDamage += 1;
+
+        NotifyUIChanged();
         return true;
     }
 
@@ -157,16 +196,19 @@ public class GameManager : MonoBehaviour
     public bool TryBuyCpsUpgrade()
     {
         double cost = GetCpsUpgradeCost();
-        if (!SpendCoins(cost)) return false;
+        if (!SpendCoins(cost))
+            return false;
 
-        cpsLevel += 1;
+        cpsLevel++;
         coinsPerSecond += cpsGainPerLevel;
+
+        NotifyUIChanged();
         return true;
     }
 
     public double GetTurretCost()
     {
-        return turretBaseCost * System.Math.Pow(turretCostGrowth, turretCount); ;
+        return turretBaseCost * System.Math.Pow(turretCostGrowth, turretCount);
     }
 
     public bool TryBuyTurret()
@@ -174,8 +216,11 @@ public class GameManager : MonoBehaviour
         double cost = GetTurretCost();
         if (!SpendCoins(cost)) return false;
 
-        turretCount += 1;
+        turretCount++;
         SpawnTurret();
+        DefenderManager.Instance.AddDefender(DefenderType.Turret);
+
+        NotifyUIChanged();
         return true;
     }
 
@@ -183,10 +228,8 @@ public class GameManager : MonoBehaviour
     {
         Vector3 center = castleTransform.position;
 
-        // Place turrets in a ring around the castle
         float radius = 0.9f;
-        float rad = (turretCount - 1) * Mathf.PI / 4f; // 8 around
-        //float rad = angleDeg * Mathf.Deg2Rad;
+        float rad = (turretCount - 1) * Mathf.PI / 4f;
 
         Vector3 offset = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * radius;
         Vector3 spawnPos = center + offset;
@@ -197,47 +240,43 @@ public class GameManager : MonoBehaviour
     public bool TryBuyMoat()
     {
         if (moatPurchased) return false;
+
         if (!SpendCoins(moatCost)) return false;
 
         moatPurchased = true;
         SpawnMoat();
+        DefenderManager.Instance.AddDefender(DefenderType.Moat);
+
+        NotifyUIChanged();
         return true;
     }
 
     void SpawnMoat()
     {
         Vector3 pos = castleTransform.position;
+
         activeMoat = Instantiate(moatPrefab, pos, Quaternion.identity);
         activeMoat.center = castleTransform;
-
         activeMoat.moatType = Moat.MoatType.Water;
         activeMoat.ApplyVisuals();
     }
 
     public bool TryUpgradeToLavaMoat()
     {
-        if (!moatPurchased) return false;
-        if (lavaMoatPurchased) return false;
-        if (!SpendCoins(lavaMoatUnlockCost)) return false;
+        if (!moatPurchased)
+            return false;
+
+        if (lavaMoatPurchased)
+            return false;
+
+        if (!SpendCoins(lavaMoatUnlockCost))
+            return false;
 
         lavaMoatPurchased = true;
-
         activeMoat.moatType = Moat.MoatType.Lava;
         activeMoat.ApplyVisuals();
 
-        return true;
-    }
-
-    public bool TryBuyLavaMoatDamageUpgrade()
-    {
-        if (!lavaMoatPurchased) return false;
-
-        double cost = GetLavaMoatUpgradeCost();
-        if (!SpendCoins(cost))
-            return false;
-
-        lavaMoatLevel++;
-        lavaMoatDps *= lavaMoatGrowth;
+        NotifyUIChanged();
         return true;
     }
 
@@ -246,14 +285,31 @@ public class GameManager : MonoBehaviour
         return lavaMoatBaseCost * System.Math.Pow(lavaMoatCostGrowth, lavaMoatLevel);
     }
 
+    public bool TryBuyLavaMoatDamageUpgrade()
+    {
+        if (!lavaMoatPurchased)
+            return false;
+
+        double cost = GetLavaMoatUpgradeCost();
+        if (!SpendCoins(cost))
+            return false;
+
+        lavaMoatLevel++;
+        lavaMoatDps *= lavaMoatGrowth;
+
+        NotifyUIChanged();
+        return true;
+    }
+
     public void DamageCastle(int amount)
     {
-        if (gameOver) return;
+        if (gameOver)
+            return;
 
         currentCastleHealth -= amount;
         currentCastleHealth = Mathf.Max(0, currentCastleHealth);
 
-        UpdateUI();
+        NotifyUIChanged();
 
         if (currentCastleHealth <= 0)
             GameOver();
@@ -262,6 +318,7 @@ public class GameManager : MonoBehaviour
     void GameOver()
     {
         gameOver = true;
+        NotifyUIChanged();
         Debug.Log("Game Over");
     }
 

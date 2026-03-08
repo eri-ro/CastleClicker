@@ -2,6 +2,16 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    public enum EnemyType
+    {
+        Basic,
+        FastFlying,
+        Tank
+    }
+
+    [Header("Type")]
+    public EnemyType enemyType = EnemyType.Basic;
+
     [Header("Movement")]
     public float speed = 1.5f;
     public Transform target;
@@ -18,6 +28,10 @@ public class Enemy : MonoBehaviour
     public bool ignoresMoatSlow = false;
     public bool ignoresMoatBurn = false;
 
+    [Header("Wave")]
+    public bool isMassiveWaveEnemy = false;
+    public double massiveWaveBonusReward = 2;
+
     float baseSpeed;
     float speedMultiplier = 1f;
     float burnAccumulator = 0f;
@@ -33,16 +47,56 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         baseSpeed = speed;
+        ApplyTypeDefaults();
     }
 
     void Update()
     {
-        HandleMovement();
+        HandleBehaviorByType();
         HandleBurn();
         UpdateVisuals();
     }
 
-    void HandleMovement()
+    void ApplyTypeDefaults()
+    {
+        switch (enemyType)
+        {
+            case EnemyType.Basic:
+                ignoresMoatSlow = false;
+                ignoresMoatBurn = false;
+                break;
+
+            case EnemyType.FastFlying:
+                ignoresMoatSlow = true;
+                ignoresMoatBurn = true;
+                break;
+
+            case EnemyType.Tank:
+                ignoresMoatSlow = false;
+                ignoresMoatBurn = false;
+                break;
+        }
+    }
+
+    void HandleBehaviorByType()
+    {
+        switch (enemyType)
+        {
+            case EnemyType.Basic:
+                MoveTowardTarget();
+                break;
+
+            case EnemyType.FastFlying:
+                MoveTowardTarget();
+                break;
+
+            case EnemyType.Tank:
+                MoveTowardTarget();
+                break;
+        }
+    }
+
+    void MoveTowardTarget()
     {
         Vector3 targetPos = target.position;
         Vector3 dir = (targetPos - transform.position).normalized;
@@ -72,9 +126,18 @@ public class Enemy : MonoBehaviour
 
     void UpdateVisuals()
     {
-        sr.color = (burnDps > 0f)
-            ? new Color(1f, 0.5f, 0.2f, 1f)
-            : defaultColor;
+        if (burnDps > 0f)
+        {
+            sr.color = new Color(1f, 0.5f, 0.2f, 1f);
+        }
+        else if (isMassiveWaveEnemy)
+        {
+            sr.color = new Color(0.7f, 0.4f, 1f, 1f);
+        }
+        else
+        {
+            sr.color = defaultColor;
+        }
     }
 
     public void TakeDamage(int amount)
@@ -89,6 +152,10 @@ public class Enemy : MonoBehaviour
 
     void Die()
     {
+        double reward = coinReward;
+        if (isMassiveWaveEnemy)
+            reward += massiveWaveBonusReward;
+
         GameManager.Instance.AddCoins(coinReward);
 
         Destroy(gameObject);
