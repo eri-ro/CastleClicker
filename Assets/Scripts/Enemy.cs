@@ -153,11 +153,9 @@ public class Enemy : MonoBehaviour
     void Die()
     {
         double reward = coinReward;
-        if (isMassiveWaveEnemy)
-            reward += massiveWaveBonusReward;
+        if (isMassiveWaveEnemy) reward += massiveWaveBonusReward;
 
         GameManager.Instance.AddCoins(coinReward);
-
         Destroy(gameObject);
     }
 

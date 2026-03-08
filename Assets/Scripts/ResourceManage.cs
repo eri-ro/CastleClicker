@@ -10,8 +10,6 @@ public class ResourceManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-
-        resources["Coins"] = 0f;
         resources["Mana"] = 0f;
     }
 
@@ -34,8 +32,22 @@ public class ResourceManager : MonoBehaviour
         return true;
     }
 
-    public void SetResource(string resourceName, float amount)
+    public float Mana
     {
-        resources[resourceName] = amount;
+        get { return resources["Mana"]; }
+    }
+
+    public void AddMana(float amount)
+    {
+        resources["Mana"] += amount;
+    }
+
+    public bool SpendMana(float amount)
+    {
+        if (resources["Mana"] < amount)
+            return false;
+
+        resources["Mana"] -= amount;
+        return true;
     }
 }

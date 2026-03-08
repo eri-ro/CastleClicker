@@ -82,6 +82,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         currentCastleHealth = maxCastleHealth;
+        SyncDefenderStats();
         NotifyUIChanged();
     }
 
@@ -103,7 +104,6 @@ public class GameManager : MonoBehaviour
     {
         coins += coinsPerSecond;
 
-        ResourceManager.Instance.AddResource("Coins", (float)coinsPerSecond);
         ResourceManager.Instance.AddResource("Mana", (float)manaPerSecond);
 
         NotifyUIChanged();
@@ -118,18 +118,15 @@ public class GameManager : MonoBehaviour
     public void AddCoins(double amount)
     {
         coins += amount;
-        ResourceManager.Instance.AddResource("Coins", (float)amount);
-
         NotifyUIChanged();
     }
 
     public bool SpendCoins(double cost)
     {
-        if (coins < cost)
-            return false;
+        if (coins < cost) return false;
 
         coins -= cost;
-        ResourceManager.Instance.SpendResource("Coins", (float)cost);
+        NotifyUIChanged();
 
         return true;
     }
@@ -139,17 +136,32 @@ public class GameManager : MonoBehaviour
         coinsText.text = "Coins: " + Mathf.FloorToInt((float)coins);
         cpsText.text = "CPS: " + FormatNumber(coinsPerSecond);
         castleHealthText.text = "Castle HP: " + currentCastleHealth + " / " + maxCastleHealth;
-        manaText.text = "Mana: " + Mathf.FloorToInt(ResourceManager.Instance.GetResource("Mana"));
+        manaText.text = "Mana: " + Mathf.FloorToInt(ResourceManager.Instance.Mana);
 
-        int cannons = DefenderManager.Instance.GetCount(DefenderType.CastleCannon);
+        int cannon = DefenderManager.Instance.GetCount(DefenderType.CastleCannon);
         int turrets = DefenderManager.Instance.GetCount(DefenderType.Turret);
-        int moats = DefenderManager.Instance.GetCount(DefenderType.Moat);
+        int moat = DefenderManager.Instance.GetCount(DefenderType.Moat);
+
+        double cannonDamageValue = DefenderManager.Instance.GetDamage(DefenderType.CastleCannon);
+        double turretDamageValue = DefenderManager.Instance.GetDamage(DefenderType.Turret);
+        double moatDamageValue = DefenderManager.Instance.GetDamage(DefenderType.Moat);
 
         defenderText.text =
             "Defenders" +
-            "\nCannon: " + cannons +
-            "\nTurrets: " + turrets +
-            "\nMoats: " + moats;
+            "\nCannon: " + cannon + " | Dmg: " + FormatNumber(cannonDamageValue) +
+            "\nTurrets: " + turrets + " | Dmg: " + FormatNumber(turretDamageValue) +
+            "\nMoat: " + moat + " | DPS: " + FormatNumber(moatDamageValue);
+    }
+
+    void SyncDefenderStats()
+    {
+        DefenderManager.Instance.SetDamage(DefenderType.CastleCannon, castleDamage);
+        DefenderManager.Instance.SetDamage(DefenderType.Turret, turretDamage);
+
+        if (lavaMoatPurchased)
+            DefenderManager.Instance.SetDamage(DefenderType.Moat, lavaMoatDps);
+        else
+            DefenderManager.Instance.SetDamage(DefenderType.Moat, 0);
     }
 
     public double GetCastleDamageUpgradeCost()
@@ -160,12 +172,12 @@ public class GameManager : MonoBehaviour
     public bool TryBuyCastleDamageUpgrade()
     {
         double cost = GetCastleDamageUpgradeCost();
-        if (!SpendCoins(cost))
-            return false;
+        if (!SpendCoins(cost)) return false;
 
         castleDamageLevel++;
         castleDamage += 1;
 
+        SyncDefenderStats();
         NotifyUIChanged();
         return true;
     }
@@ -178,12 +190,12 @@ public class GameManager : MonoBehaviour
     public bool TryBuyTurretDamageUpgrade()
     {
         double cost = GetTurretDamageUpgradeCost();
-        if (!SpendCoins(cost))
-            return false;
+        if (!SpendCoins(cost)) return false;
 
         turretDamageLevel++;
         turretDamage += 1;
 
+        SyncDefenderStats();
         NotifyUIChanged();
         return true;
     }
@@ -196,8 +208,7 @@ public class GameManager : MonoBehaviour
     public bool TryBuyCpsUpgrade()
     {
         double cost = GetCpsUpgradeCost();
-        if (!SpendCoins(cost))
-            return false;
+        if (!SpendCoins(cost)) return false;
 
         cpsLevel++;
         coinsPerSecond += cpsGainPerLevel;
@@ -234,7 +245,7 @@ public class GameManager : MonoBehaviour
         Vector3 offset = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * radius;
         Vector3 spawnPos = center + offset;
 
-        Instantiate(turretPrefab, spawnPos, Quaternion.identity);
+        Instantiate(turretPrefab, spawnPos, Quaternion.identity, SceneContainers.Instance.turrets);
     }
 
     public bool TryBuyMoat()
@@ -247,6 +258,7 @@ public class GameManager : MonoBehaviour
         SpawnMoat();
         DefenderManager.Instance.AddDefender(DefenderType.Moat);
 
+        SyncDefenderStats();
         NotifyUIChanged();
         return true;
     }
@@ -263,19 +275,17 @@ public class GameManager : MonoBehaviour
 
     public bool TryUpgradeToLavaMoat()
     {
-        if (!moatPurchased)
-            return false;
+        if (!moatPurchased) return false;
 
-        if (lavaMoatPurchased)
-            return false;
+        if (lavaMoatPurchased) return false;
 
-        if (!SpendCoins(lavaMoatUnlockCost))
-            return false;
+        if (!SpendCoins(lavaMoatUnlockCost)) return false;
 
         lavaMoatPurchased = true;
         activeMoat.moatType = Moat.MoatType.Lava;
         activeMoat.ApplyVisuals();
 
+        SyncDefenderStats();
         NotifyUIChanged();
         return true;
     }
@@ -287,16 +297,15 @@ public class GameManager : MonoBehaviour
 
     public bool TryBuyLavaMoatDamageUpgrade()
     {
-        if (!lavaMoatPurchased)
-            return false;
+        if (!lavaMoatPurchased) return false;
 
         double cost = GetLavaMoatUpgradeCost();
-        if (!SpendCoins(cost))
-            return false;
+        if (!SpendCoins(cost)) return false;
 
         lavaMoatLevel++;
         lavaMoatDps *= lavaMoatGrowth;
 
+        SyncDefenderStats();
         NotifyUIChanged();
         return true;
     }
@@ -324,7 +333,7 @@ public class GameManager : MonoBehaviour
 
     public string FormatNumber(double value)
     {
-        if (value < 1000)
+        if (value < 100000)
             return Mathf.FloorToInt((float)value).ToString();
 
         return value.ToString("0.###e0");

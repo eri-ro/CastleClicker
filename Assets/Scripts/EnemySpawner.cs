@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -39,26 +38,21 @@ public class EnemySpawner : MonoBehaviour
     public TMP_Text waveStatusText;
     public float clearedMessageDuration = 2f;
 
-    float clearedMessageTimer = 0f;
-
     bool waveRewardGranted = false;
     bool waveActive = false;
+    bool spawningMassiveWave = false;
 
     float spawnTimer = 0f;
     float elapsedTime = 0f;
     float waveTimer = 0f;
     float scalingTimer = 0f;
-
-    bool spawningMassiveWave = false;
-
-    public List<Enemy> currentWaveEnemies = new List<Enemy>();
+    float clearedMessageTimer = 0f;
 
     void Update()
     {
         elapsedTime += Time.deltaTime;
 
         HandleScaling();
-        CleanupWaveEnemyList();
 
         if (!spawningMassiveWave)
         {
@@ -103,7 +97,7 @@ public class EnemySpawner : MonoBehaviour
     {
         spawningMassiveWave = true;
         waveRewardGranted = false;
-        currentWaveEnemies.Clear();
+        EnemyRegistry.Instance.ClearCurrentWave();
 
         waveStatusText.text = "Massive Wave Incoming!";
 
@@ -112,29 +106,14 @@ public class EnemySpawner : MonoBehaviour
         for (int i = 0; i < massiveWaveSize; i++)
         {
             Enemy enemy = SpawnSingleEnemy(true);
-            if (enemy != null)
-                currentWaveEnemies.Add(enemy);
+            EnemyRegistry.Instance.AddToCurrentWave(enemy);
 
             yield return new WaitForSeconds(timeBetweenWaveSpawns);
         }
 
-        CleanupWaveEnemyList();
-
-        // Mark wave active only after enemies exist
-        waveActive = currentWaveEnemies.Count > 0;
-
+        EnemyRegistry.Instance.CleanupNulls();
+        waveActive = EnemyRegistry.Instance.GetAliveWaveEnemyCount() > 0;
         spawningMassiveWave = false;
-    }
-
-    void CleanupWaveEnemyList()
-    {
-        currentWaveEnemies.RemoveAll(enemy => enemy == null);
-    }
-
-    public int GetAliveWaveEnemyCount()
-    {
-        CleanupWaveEnemyList();
-        return currentWaveEnemies.Count;
     }
 
     Enemy SpawnSingleEnemy(bool isWaveEnemy = false)
@@ -147,7 +126,7 @@ public class EnemySpawner : MonoBehaviour
 
         Enemy prefab = ChooseEnemyType();
 
-        Enemy enemy = Instantiate(prefab, spawnPos, Quaternion.identity);
+        Enemy enemy = Instantiate(prefab, spawnPos, Quaternion.identity, SceneContainers.Instance.enemies);
         enemy.target = castleTarget;
         enemy.hp = Mathf.RoundToInt(enemy.hp * hpMultiplier);
         enemy.isMassiveWaveEnemy = isWaveEnemy;
@@ -164,18 +143,13 @@ public class EnemySpawner : MonoBehaviour
 
         if (elapsedTime < tankUnlockTime)
         {
-            if (roll < 0.7f)
-                return basicEnemy;
-            else
-                return fastEnemy;
+            if (roll < 0.7f) return basicEnemy;
+            else return fastEnemy;
         }
 
-        if (roll < 0.55f)
-            return basicEnemy;
-        else if (roll < 0.80f)
-            return fastEnemy;
-        else
-            return tankEnemy;
+        if (roll < 0.55f) return basicEnemy;
+        else if (roll < 0.80f) return fastEnemy;
+        else return tankEnemy;
     }
 
     void CheckWaveCleared()
@@ -183,19 +157,14 @@ public class EnemySpawner : MonoBehaviour
         if (!waveActive) return;
         if (waveRewardGranted) return;
 
-        CleanupWaveEnemyList();
-
-        if (currentWaveEnemies.Count == 0)
+        if (EnemyRegistry.Instance.GetAliveWaveEnemyCount() == 0)
         {
             waveRewardGranted = true;
             waveActive = false;
             clearedMessageTimer = clearedMessageDuration;
 
-            if (GameManager.Instance != null)
-                GameManager.Instance.AddCoins(waveClearReward);
-
-            if (waveStatusText != null)
-                waveStatusText.text = "Wave Cleared! +" + FormatWaveReward(waveClearReward) + " Coins";
+            GameManager.Instance.AddCoins(waveClearReward);
+            waveStatusText.text = "Wave Cleared! +" + FormatWaveReward(waveClearReward) + " Coins";
         }
     }
 
@@ -203,8 +172,7 @@ public class EnemySpawner : MonoBehaviour
     {
         if (waveActive)
         {
-            CleanupWaveEnemyList();
-            waveStatusText.text = "Wave Enemies Left: " + currentWaveEnemies.Count;
+            waveStatusText.text = "Wave Enemies Left: " + EnemyRegistry.Instance.GetAliveWaveEnemyCount();
             return;
         }
 
@@ -218,9 +186,6 @@ public class EnemySpawner : MonoBehaviour
 
     string FormatWaveReward(double value)
     {
-        if (GameManager.Instance != null)
-            return GameManager.Instance.FormatNumber(value);
-
-        return value.ToString("0");
+        return GameManager.Instance.FormatNumber(value);
     }
 }

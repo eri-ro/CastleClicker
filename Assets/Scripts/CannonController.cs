@@ -29,7 +29,7 @@ public class CannonController : MonoBehaviour
 
         if (dir.sqrMagnitude < 0.0001f) return;
 
-        Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity);
+        Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity, SceneContainers.Instance.projectiles);
 
         int dmg = 1;
         dmg = Mathf.Max(1, Mathf.RoundToInt((float)GameManager.Instance.castleDamage));
