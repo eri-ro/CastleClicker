@@ -97,8 +97,8 @@ public class ShopUI : MonoBehaviour
         double cost = game.GetCastleDamageUpgradeCost();
 
         castleDamageButtonText.text =
-           "Castle Damage +" +
-           "\nDamage: " + game.FormatNumber(game.castleDamage) +
+           "Castle Damage" +
+           "\nDamage: " + game.FormatNumber(game.castleDamage + 1) +
            "\nCost: " + game.FormatNumber(cost);
 
         castleDamageButton.interactable = game.coins >= cost;
@@ -109,8 +109,8 @@ public class ShopUI : MonoBehaviour
         double cost = game.GetTurretDamageUpgradeCost();
 
         turretDamageButtonText.text =
-            "Turret Damage +" +
-            "\nDamage: " + game.FormatNumber(game.turretDamage) +
+            "Turret Damage" +
+            "\nDamage: " + game.FormatNumber(game.turretDamage + 1) +
             "\nCost: " + game.FormatNumber(cost);
 
         turretDamageButton.interactable = game.coins >= cost;
