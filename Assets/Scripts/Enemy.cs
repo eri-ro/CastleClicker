@@ -42,6 +42,18 @@ public class Enemy : MonoBehaviour
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
+
+        defaultColor = sr.color;
+    }
+
+    void OnEnable()
+    {
+        EnemyRegistry.Instance.Register(this);
+    }
+
+    void OnDisable()
+    {
+        EnemyRegistry.Instance.Unregister(this);
     }
 
     void Start()
@@ -57,7 +69,7 @@ public class Enemy : MonoBehaviour
         UpdateVisuals();
     }
 
-    void ApplyTypeDefaults()
+    public void ApplyTypeDefaults()
     {
         switch (enemyType)
         {
@@ -153,9 +165,11 @@ public class Enemy : MonoBehaviour
     void Die()
     {
         double reward = coinReward;
-        if (isMassiveWaveEnemy) reward += massiveWaveBonusReward;
 
-        GameManager.Instance.AddCoins(coinReward);
+        if (isMassiveWaveEnemy)
+            reward += massiveWaveBonusReward;
+
+        GameManager.Instance.AddCoins(reward);
         Destroy(gameObject);
     }
 
@@ -179,7 +193,6 @@ public class Enemy : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         GameManager.Instance.DamageCastle(castleDamage);
-
         Destroy(gameObject);
     }
 }
