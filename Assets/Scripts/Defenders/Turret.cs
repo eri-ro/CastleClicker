@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Turret : MonoBehaviour
@@ -24,36 +25,29 @@ public class Turret : MonoBehaviour
 
         Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity, SceneContainers.Instance.projectiles);
 
-        int dmg = 1;
-        dmg = Mathf.Max(1, Mathf.RoundToInt((float)GameManager.Instance.turretDamage));
+        int dmg = Mathf.Max(1, Mathf.RoundToInt((float)GameManager.Instance.turretDamage));
 
         projectile.Initialize(dir, dmg);
     }
 
     Enemy FindNearestEnemyInRange()
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        if (enemies == null || enemies.Length == 0) return null;
+        List<Enemy> enemies = EnemyRegistry.Instance.activeEnemies;
+        if (enemies.Count == 0) return null;
 
         Enemy best = null;
         float bestSqr = range * range;
-
         Vector3 pos = transform.position;
 
-        for (int i = 0; i < enemies.Length; i++)
+        for (int i = 0; i < enemies.Count; i++)
         {
-            GameObject go = enemies[i];
-            if (go == null) continue;
+            Enemy enemy = enemies[i];
 
-            float sqr = (go.transform.position - pos).sqrMagnitude;
+            float sqr = (enemy.transform.position - pos).sqrMagnitude;
             if (sqr <= bestSqr)
             {
-                Enemy enemy = go.GetComponent<Enemy>();
-                if (enemy != null)
-                {
-                    bestSqr = sqr;
-                    best = enemy;
-                }
+                bestSqr = sqr;
+                best = enemy;
             }
         }
 

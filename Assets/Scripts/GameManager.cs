@@ -7,12 +7,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Economy")]
-    public double coins = 0;
     public double coinsPerSecond = 1;
-
-    [Header("Passive Resources")]
-    public double manaPerSecond = 1;
-
+    public double manaPerSecond = 1; 
+    
     [Header("Castle Health")]
     public int maxCastleHealth = 100;
     public int currentCastleHealth;
@@ -21,9 +18,9 @@ public class GameManager : MonoBehaviour
     [Header("Combat Stats")]
     public double castleDamage = 1;
     public double turretDamage = 1;
-    public double lavaMoatDps = 1;
+    public double lavaMoatDps = 5;
 
-    [Header("Castle Damage Upgrade")]
+    [Header("Damage Upgrade")]
     public int castleDamageLevel = 0;
     public double castleDamageBaseCost = 10;
     public double castleDamageCostGrowth = 1.15;
@@ -58,7 +55,17 @@ public class GameManager : MonoBehaviour
     public bool lavaMoatPurchased = false;
     public double moatCost = 150;
     public double lavaMoatUnlockCost = 300;
+
     Moat activeMoat;
+
+    [Header("Knights")]
+    public Knight knightPrefab;
+    public int knightCount = 0;
+    public double knightDamage = 1;
+    public double knightBaseCost = 75;
+    public double knightCostGrowth = 1.22;
+    public float knightOrbitRadius = 2.0f;
+    public float knightOrbitSpeed = Mathf.PI / 2f;
 
     [Header("UI")]
     public TMP_Text coinsText;
@@ -69,10 +76,9 @@ public class GameManager : MonoBehaviour
 
     public System.Action OnUIDataChanged;
 
-    [Header("Debug")]
-    public InputActionReference getCoinInput;
-
     float passiveTimer = 0f;
+
+    public InputActionReference getCoinInput;
 
     void Awake()
     {
@@ -82,6 +88,9 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         currentCastleHealth = maxCastleHealth;
+
+        ResourceManager.Instance.OnResourceChanged += OnResourceChanged;
+
         SyncDefenderStats();
         NotifyUIChanged();
     }
@@ -93,19 +102,16 @@ public class GameManager : MonoBehaviour
         if (passiveTimer >= 1f)
         {
             passiveTimer -= 1f;
-            GainPassiveResources();
+            ResourceManager.Instance.AddResource(ResourceType.Coins, coinsPerSecond);
+            ResourceManager.Instance.AddResource(ResourceType.Mana, manaPerSecond);
         }
 
         if (getCoinInput.action.triggered)
             AddCoins(50);
     }
 
-    void GainPassiveResources()
+    public void NotifyUpgradeSystemChanged()
     {
-        coins += coinsPerSecond;
-
-        ResourceManager.Instance.AddResource("Mana", (float)manaPerSecond);
-
         NotifyUIChanged();
     }
 
@@ -117,46 +123,50 @@ public class GameManager : MonoBehaviour
 
     public void AddCoins(double amount)
     {
-        coins += amount;
-        NotifyUIChanged();
+        ResourceManager.Instance.AddResource(ResourceType.Coins, amount);
     }
 
     public bool SpendCoins(double cost)
     {
-        if (coins < cost) return false;
-
-        coins -= cost;
-        NotifyUIChanged();
-
-        return true;
+        return ResourceManager.Instance.SpendResource(ResourceType.Coins, cost);
     }
 
     void UpdateUI()
     {
-        coinsText.text = "Coins: " + Mathf.FloorToInt((float)coins);
+        double coins = ResourceManager.Instance.GetResource(ResourceType.Coins);
+        double mana = ResourceManager.Instance.GetResource(ResourceType.Mana);
+
+        coinsText.text = "Coins: " + FormatNumber(coins);
         cpsText.text = "CPS: " + FormatNumber(coinsPerSecond);
-        castleHealthText.text = "Castle HP: " + currentCastleHealth + " / " + maxCastleHealth;
-        manaText.text = "Mana: " + Mathf.FloorToInt(ResourceManager.Instance.Mana);
+
+        castleHealthText.text =
+            "Castle HP: " + currentCastleHealth + " / " + maxCastleHealth;
+
+        manaText.text = "Mana: " + FormatNumber(mana);
 
         int cannon = DefenderManager.Instance.GetCount(DefenderType.CastleCannon);
         int turrets = DefenderManager.Instance.GetCount(DefenderType.Turret);
         int moat = DefenderManager.Instance.GetCount(DefenderType.Moat);
+        int knights = DefenderManager.Instance.GetCount(DefenderType.Knight);
 
         double cannonDamageValue = DefenderManager.Instance.GetDamage(DefenderType.CastleCannon);
         double turretDamageValue = DefenderManager.Instance.GetDamage(DefenderType.Turret);
         double moatDamageValue = DefenderManager.Instance.GetDamage(DefenderType.Moat);
+        double knightDamageValue = DefenderManager.Instance.GetDamage(DefenderType.Knight);
 
         defenderText.text =
             "Defenders" +
             "\nCannon: " + cannon + " | Dmg: " + FormatNumber(cannonDamageValue) +
             "\nTurrets: " + turrets + " | Dmg: " + FormatNumber(turretDamageValue) +
-            "\nMoat: " + moat + " | DPS: " + FormatNumber(moatDamageValue);
+            "\nMoat: " + moat + " | DPS: " + FormatNumber(moatDamageValue) +
+            "\nKnights: " + knights + " | Dmg: " + FormatNumber(knightDamageValue);
     }
 
     void SyncDefenderStats()
     {
         DefenderManager.Instance.SetDamage(DefenderType.CastleCannon, castleDamage);
         DefenderManager.Instance.SetDamage(DefenderType.Turret, turretDamage);
+        DefenderManager.Instance.SetDamage(DefenderType.Knight, knightDamage);
 
         if (lavaMoatPurchased)
             DefenderManager.Instance.SetDamage(DefenderType.Moat, lavaMoatDps);
@@ -267,7 +277,7 @@ public class GameManager : MonoBehaviour
     {
         Vector3 pos = castleTransform.position;
 
-        activeMoat = Instantiate(moatPrefab, pos, Quaternion.identity);
+        activeMoat = Instantiate(moatPrefab, pos, Quaternion.identity, castleTransform);
         activeMoat.center = castleTransform;
         activeMoat.moatType = Moat.MoatType.Water;
         activeMoat.ApplyVisuals();
@@ -310,6 +320,45 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    public double GetKnightCost()
+    {
+        return knightBaseCost * System.Math.Pow(knightCostGrowth, knightCount);
+    }
+
+    public bool TryBuyKnight()
+    {
+        double cost = GetKnightCost();
+        if (!SpendCoins(cost)) return false;
+
+        knightCount++;
+        SpawnKnight();
+        DefenderManager.Instance.AddDefender(DefenderType.Knight);
+
+        NotifyUIChanged();
+        return true;
+    }
+
+    void SpawnKnight()
+    {
+        Vector3 center = castleTransform.position;
+
+        float angleStep = (Mathf.PI * 2f) / Mathf.Max(1, knightCount);
+        float spawnAngle = (knightCount - 1) * angleStep;
+
+        Knight knight = Instantiate(
+            knightPrefab,
+            center,
+            Quaternion.identity,
+            SceneContainers.Instance.turrets
+        );
+
+        knight.center = castleTransform;
+        knight.orbitRadius = knightOrbitRadius;
+        knight.orbitSpeed = knightOrbitSpeed;
+        knight.angle = spawnAngle;
+        knight.SetDamage(Mathf.FloorToInt((float)knightDamage));
+    }
+
     public void DamageCastle(int amount)
     {
         if (gameOver)
@@ -322,6 +371,17 @@ public class GameManager : MonoBehaviour
 
         if (currentCastleHealth <= 0)
             GameOver();
+    }
+
+    void OnResourceChanged(ResourceType type, double amount)
+    {
+        UpdateUI();
+        OnUIDataChanged?.Invoke();
+    }
+
+    void OnDestroy()
+    {
+        ResourceManager.Instance.OnResourceChanged -= OnResourceChanged;
     }
 
     void GameOver()

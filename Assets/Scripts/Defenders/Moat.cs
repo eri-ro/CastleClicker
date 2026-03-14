@@ -13,7 +13,6 @@ public class Moat : MonoBehaviour
     [Header("Effects")]
     public MoatType moatType = MoatType.Water;
     public float slowMultiplier = 0.6f;
-    public float lavaBurnDps = 25f;
 
     [Header("Target")]
     public Transform center;
@@ -47,18 +46,17 @@ public class Moat : MonoBehaviour
 
         Vector3 c = center.position;
 
-        GameObject[] enemyGOs = GameObject.FindGameObjectsWithTag("Enemy");
-        if (enemyGOs == null || enemyGOs.Length == 0) return;
+        EnemyRegistry.Instance.CleanupNulls();
 
-        for (int i = 0; i < enemyGOs.Length; i++)
+        var enemies = EnemyRegistry.Instance.activeEnemies;
+        if (enemies.Count == 0) return;
+
+        for (int i = 0; i < enemies.Count; i++)
         {
-            GameObject go = enemyGOs[i];
-            if (go == null) continue;
-
-            Enemy e = go.GetComponent<Enemy>();
+            Enemy e = enemies[i];
             if (e == null) continue;
 
-            float d = Vector2.Distance(go.transform.position, c);
+            float d = Vector2.Distance(e.transform.position, c);
             bool inRing = (d >= innerRadius && d <= outerRadius);
 
             if (inRing)
@@ -69,13 +67,7 @@ public class Moat : MonoBehaviour
                     e.ResetSpeedMultiplier();
 
                 if (moatType == MoatType.Lava && !e.ignoresMoatBurn)
-                {
-                    double burn = lavaBurnDps;
-
-                    burn = GameManager.Instance.lavaMoatDps;
-
-                    e.SetBurnDps((float)burn);
-                }
+                    e.SetBurnDps((float)GameManager.Instance.lavaMoatDps);
                 else
                     e.SetBurnDps(0f);
             }

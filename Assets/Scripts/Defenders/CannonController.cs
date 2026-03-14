@@ -31,8 +31,7 @@ public class CannonController : MonoBehaviour
 
         Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity, SceneContainers.Instance.projectiles);
 
-        int dmg = 1;
-        dmg = Mathf.Max(1, Mathf.RoundToInt((float)GameManager.Instance.castleDamage));
+        int dmg = Mathf.Max(1, Mathf.RoundToInt((float)GameManager.Instance.castleDamage));
 
         projectile.Initialize(dir, dmg);
     }

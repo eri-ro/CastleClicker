@@ -41,7 +41,7 @@ public class Enemy : MonoBehaviour
 
     void Awake()
     {
-        sr = GetComponent<SpriteRenderer>();
+        sr = GetComponentInChildren<SpriteRenderer>();
 
         defaultColor = sr.color;
     }
@@ -112,6 +112,11 @@ public class Enemy : MonoBehaviour
     {
         Vector3 targetPos = target.position;
         Vector3 dir = (targetPos - transform.position).normalized;
+
+        if (dir.sqrMagnitude > 0.001f)
+        {
+            transform.up = -dir;
+        }
 
         float currentSpeed = baseSpeed * speedMultiplier;
         transform.position += dir * currentSpeed * Time.deltaTime;
