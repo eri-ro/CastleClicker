@@ -30,6 +30,26 @@ public class EnemySpawner : MonoBehaviour
     public float hpGrowthRate = 0.15f;
     public float scalingInterval = 30f;
 
+    [Header("Defender scaling (enemies get tougher as you buy more)")]
+    [Tooltip("Scale enemy HP based on defender count so the game stays challenging.")]
+    public bool scaleEnemyHpWithDefenders = true;
+    [Tooltip("Enemy HP mult = 1 + defenderPower * this. Higher = much tougher enemies when you have lots of defenders.")]
+    [Range(0.1f, 1f)]
+    public float defenderHpScale = 0.4f;
+    [Tooltip("Power per turret owned.")]
+    public float defenderPowerPerTurret = 0.5f;
+    [Tooltip("Power added when lava moat is unlocked.")]
+    public float defenderPowerLavaMoat = 1.5f;
+    [Tooltip("Power per knight owned.")]
+    public float defenderPowerPerKnight = 0.35f;
+    [Tooltip("Power from cannon (always 1).")]
+    public float defenderPowerCannon = 0.2f;
+    [Tooltip("If true, enemies deal more damage to the castle when you have more defenders.")]
+    public bool scaleEnemyDamageWithDefenders = false;
+    [Tooltip("Enemy castle damage mult = 1 + defenderPower * this. Only if scaleEnemyDamageWithDefenders is on.")]
+    [Range(0f, 0.5f)]
+    public float defenderDamageScale = 0.08f;
+
     [Header("Wave Rewards")]
     public double waveClearReward = 25;
     public double waveClearRewardGrowth = 1.25;
@@ -62,8 +82,13 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
-        elapsedTime += Time.deltaTime;
+        if (CastleManager.Instance.gameOver)
+        {
+            waveStatusText.text = "Game Over";
+            return;
+        }
 
+        elapsedTime += Time.deltaTime;
         HandleScaling();
 
         if (!spawningMassiveWave)
@@ -93,6 +118,24 @@ public class EnemySpawner : MonoBehaviour
             massiveWaveSize += 3;
             waveClearReward *= waveClearRewardGrowth;
         }
+    }
+
+    float GetDefenderPower()
+    {
+        if (UpgradeManager.Instance == null) return 0f;
+        var up = UpgradeManager.Instance;
+        float power = defenderPowerCannon;
+        power += up.GetTurretCount() * defenderPowerPerTurret;
+        if (up.IsLavaMoatPurchased())
+            power += defenderPowerLavaMoat;
+        power += up.GetKnightCount() * defenderPowerPerKnight;
+        return power;
+    }
+
+    float GetDefenderHpMultiplier()
+    {
+        if (!scaleEnemyHpWithDefenders) return 1f;
+        return 1f + GetDefenderPower() * defenderHpScale;
     }
 
     void HandleEndlessSpawn()
@@ -136,7 +179,6 @@ public class EnemySpawner : MonoBehaviour
         {
             Enemy enemy = SpawnSingleEnemy(true);
             EnemyRegistry.Instance.AddToCurrentWave(enemy);
-
             yield return new WaitForSeconds(waveSpawnDelay);
         }
 
@@ -147,13 +189,12 @@ public class EnemySpawner : MonoBehaviour
 
     Enemy SpawnSingleEnemy(bool isWaveEnemy = false)
     {
-        Vector3 center = castleTarget.position;
+        Enemy prefab = ChooseEnemyType();
 
+        Vector3 center = castleTarget.position;
         float rad = Random.Range(0f, 2f * Mathf.PI);
         Vector3 dir = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f);
         Vector3 spawnPos = center + dir * spawnRadius;
-
-        Enemy prefab = ChooseEnemyType();
 
         Enemy enemy = Instantiate(
             prefab,
@@ -163,7 +204,13 @@ public class EnemySpawner : MonoBehaviour
         );
 
         enemy.target = castleTarget;
-        enemy.hp = Mathf.RoundToInt(enemy.hp * hpMultiplier);
+        float hpScale = hpMultiplier * GetDefenderHpMultiplier();
+        enemy.hp = Mathf.Max(1, Mathf.RoundToInt(enemy.hp * hpScale));
+        if (scaleEnemyDamageWithDefenders)
+        {
+            float dmgMult = 1f + GetDefenderPower() * defenderDamageScale;
+            enemy.castleDamage = Mathf.Max(1, Mathf.RoundToInt(enemy.castleDamage * dmgMult));
+        }
         enemy.isMassiveWaveEnemy = isWaveEnemy;
 
         if (isWaveEnemy)
@@ -207,6 +254,7 @@ public class EnemySpawner : MonoBehaviour
         {
             waveRewardGranted = true;
             waveActive = false;
+            currentWaveModifier = WaveModifier.None;
             clearedMessageTimer = clearedMessageDuration;
 
             GameManager.Instance.AddCoins(waveClearReward);
@@ -304,6 +352,6 @@ public class EnemySpawner : MonoBehaviour
 
     string FormatWaveReward(double value)
     {
-        return GameManager.Instance.FormatNumber(value);
+        return FormatUtils.FormatNumber(value);
     }
 }

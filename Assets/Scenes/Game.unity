@@ -131,8 +131,9 @@ GameObject:
   - component: {fileID: 42224431}
   - component: {fileID: 42224430}
   - component: {fileID: 42224429}
+  - component: {fileID: 42224432}
   m_Layer: 5
-  m_Name: MoatButton
+  m_Name: BuyMoatButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -202,9 +203,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_MoatButton
+      - m_Target: {fileID: 42224432}
+        m_TargetAssemblyTypeName: UpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -252,6 +253,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42224427}
   m_CullTransparentMesh: 1
+--- !u!114 &42224432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42224427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e1ff33585324339ae606ec7bca340a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeButton
+  button: {fileID: 42224429}
+  labelText: {fileID: 1046358454}
+  effectType: 4
 --- !u!1 &125429737
 GameObject:
   m_ObjectHideFlags: 0
@@ -281,50 +297,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee35aa08658c842b985d9c652efd399f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameState
-  coinsPerSecond: 1
-  manaPerSecond: 1
-  maxCastleHealth: 100
-  currentCastleHealth: 0
-  gameOver: 0
-  castleDamage: 1
-  turretDamage: 1
-  lavaMoatDps: 5
-  castleDamageLevel: 0
-  castleDamageBaseCost: 10
-  castleDamageCostGrowth: 1.15
-  turretDamageLevel: 0
-  turretDamageBaseCost: 25
-  turretDamageCostGrowth: 1.18
-  lavaMoatLevel: 0
-  lavaMoatBaseCost: 100
-  lavaMoatCostGrowth: 1.22
-  lavaMoatGrowth: 1.25
-  cpsLevel: 0
-  cpsBaseCost: 20
-  cpsCostGrowth: 1.1699999570846558
-  cpsGainPerLevel: 1
   turretPrefab: {fileID: 1489018172955978392, guid: 741d2aab44a08450aab4f2e21493fc90, type: 3}
   castleTransform: {fileID: 1161162598}
-  turretCount: 0
-  turretBaseCost: 50
-  turretCostGrowth: 1.25
   moatPrefab: {fileID: 3677329343708216962, guid: c0ae20c1dd79a454cb29608e8f257ade, type: 3}
-  moatPurchased: 0
-  lavaMoatPurchased: 0
-  moatCost: 150
-  lavaMoatUnlockCost: 300
   knightPrefab: {fileID: 2413839924605531057, guid: fdde8730b112d024cb81e2cf410786e2, type: 3}
-  knightCount: 0
-  knightDamage: 5
-  knightBaseCost: 75
-  knightCostGrowth: 1.22
   knightOrbitRadius: 2
   knightOrbitSpeed: 1.5707964
-  coinsText: {fileID: 922599609}
-  cpsText: {fileID: 1521911780}
-  castleHealthText: {fileID: 287743175}
-  manaText: {fileID: 1817681788}
-  defenderText: {fileID: 158102294}
   getCoinInput: {fileID: -2099379676528639254, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
 --- !u!4 &125429739
 Transform:
@@ -489,8 +467,9 @@ GameObject:
   - component: {fileID: 225571115}
   - component: {fileID: 225571114}
   - component: {fileID: 225571113}
+  - component: {fileID: 225571116}
   m_Layer: 5
-  m_Name: KnightButton
+  m_Name: BuyKnightButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -505,7 +484,7 @@ RectTransform:
   m_GameObject: {fileID: 225571111}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 481853552}
@@ -513,8 +492,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -480, y: -75}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -499, y: -75}
+  m_SizeDelta: {x: 300, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &225571113
 MonoBehaviour:
@@ -560,9 +539,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyKnight
+      - m_Target: {fileID: 225571116}
+        m_TargetAssemblyTypeName: UpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -610,6 +589,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 225571111}
   m_CullTransparentMesh: 1
+--- !u!114 &225571116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225571111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e1ff33585324339ae606ec7bca340a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeButton
+  button: {fileID: 225571113}
+  labelText: {fileID: 481853553}
+  effectType: 7
 --- !u!1 &246569289
 GameObject:
   m_ObjectHideFlags: 0
@@ -622,6 +616,7 @@ GameObject:
   - component: {fileID: 246569293}
   - component: {fileID: 246569292}
   - component: {fileID: 246569291}
+  - component: {fileID: 246569294}
   m_Layer: 5
   m_Name: CpsUpgradeButton
   m_TagString: Untagged
@@ -693,9 +688,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyCps
+      - m_Target: {fileID: 246569294}
+        m_TargetAssemblyTypeName: CpsUpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -743,6 +738,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 246569289}
   m_CullTransparentMesh: 1
+--- !u!114 &246569294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246569289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff62f4113892d4d999e9f09a7cc71c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CpsUpgradeButton
+  button: {fileID: 246569291}
+  labelText: {fileID: 2075759195}
+  game: {fileID: 125429738}
 --- !u!1 &287743173
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,6 +932,14 @@ MonoBehaviour:
   hpMultiplier: 1
   hpGrowthRate: 0.15
   scalingInterval: 30
+  scaleEnemyHpWithDefenders: 1
+  defenderHpScale: 0.4
+  defenderPowerPerTurret: 0.5
+  defenderPowerLavaMoat: 1.5
+  defenderPowerPerKnight: 0.35
+  defenderPowerCannon: 0.2
+  scaleEnemyDamageWithDefenders: 0
+  defenderDamageScale: 0.08
   waveClearReward: 25
   waveClearRewardGrowth: 1.25
   waveStatusText: {fileID: 801628581}
@@ -972,13 +990,13 @@ RectTransform:
   m_Children:
   - {fileID: 1830090867}
   - {fileID: 464600713}
-  - {fileID: 42224428}
-  - {fileID: 246569290}
   - {fileID: 2136036319}
+  - {fileID: 42224428}
   - {fileID: 2077179213}
+  - {fileID: 225571112}
+  - {fileID: 246569290}
   - {fileID: 1015128063}
   - {fileID: 1408850097}
-  - {fileID: 225571112}
   m_Father: {fileID: 730408808}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
@@ -998,8 +1016,9 @@ GameObject:
   - component: {fileID: 464600715}
   - component: {fileID: 464600714}
   - component: {fileID: 464600716}
+  - component: {fileID: 464600717}
   m_Layer: 5
-  m_Name: TurretUpgradeButton
+  m_Name: BuyTurretButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1107,9 +1126,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyTurret
+      - m_Target: {fileID: 464600717}
+        m_TargetAssemblyTypeName: UpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1119,6 +1138,21 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &464600717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464600712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e1ff33585324339ae606ec7bca340a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeButton
+  button: {fileID: 464600716}
+  labelText: {fileID: 2061442390}
+  effectType: 3
 --- !u!1 &469947715
 GameObject:
   m_ObjectHideFlags: 0
@@ -1568,7 +1602,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 567672564}
-  - component: {fileID: 567672563}
+  - component: {fileID: 567672565}
   m_Layer: 0
   m_Name: DefenderManger
   m_TagString: Untagged
@@ -1576,18 +1610,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &567672563
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 567672562}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f9d0662fd0cec347a7e013a23b69f68, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefenderManger
 --- !u!4 &567672564
 Transform:
   m_ObjectHideFlags: 0
@@ -1603,6 +1625,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 999117880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &567672565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 567672562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e861832d342f4238af37f1a536364a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefenderManager
 --- !u!1 &571993206
 GameObject:
   m_ObjectHideFlags: 0
@@ -1885,6 +1919,7 @@ GameObject:
   - component: {fileID: 730408807}
   - component: {fileID: 730408806}
   - component: {fileID: 730408805}
+  - component: {fileID: 730408809}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1981,6 +2016,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &730408809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730408804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c582909a86a2e44a19aa78fde388f16c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameplayUI
+  coinsText: {fileID: 922599609}
+  cpsText: {fileID: 1521911780}
+  manaText: {fileID: 1817681788}
+  castleHealthText: {fileID: 287743175}
+  defenderText: {fileID: 158102294}
 --- !u!1 &743290835
 GameObject:
   m_ObjectHideFlags: 0
@@ -2149,10 +2201,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 730408808}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 300}
-  m_SizeDelta: {x: 500, y: 300}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -240}
+  m_SizeDelta: {x: 1500, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &801628581
 MonoBehaviour:
@@ -2208,8 +2260,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -2283,24 +2335,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopUI
   game: {fileID: 125429738}
-  castleDamageButton: {fileID: 1830090870}
-  castleDamageButtonText: {fileID: 1442178442}
-  turretDamageButton: {fileID: 2136036322}
-  turretDamageButtonText: {fileID: 743290838}
-  cpsButton: {fileID: 246569291}
-  cpsButtonText: {fileID: 2075759195}
-  turretButton: {fileID: 464600716}
-  turretButtonText: {fileID: 2061442390}
-  moatButton: {fileID: 42224429}
-  moatButtonText: {fileID: 1046358454}
-  lavaDamageButton: {fileID: 2077179216}
-  lavaDamageButtonText: {fileID: 480655992}
-  knightButton: {fileID: 225571113}
-  knightButtonText: {fileID: 481853553}
-  coinIncomeUpgradeButton: {fileID: 1015128060}
-  coinIncomeUpgradeText: {fileID: 1654610633}
-  manaIncomeUpgradeButton: {fileID: 1408850098}
-  manaIncomeUpgradeText: {fileID: 1759644282}
+  upgradeButtons:
+  - {fileID: 1830090871}
+  - {fileID: 2136036323}
+  - {fileID: 464600717}
+  - {fileID: 42224432}
+  - {fileID: 2077179217}
+  - {fileID: 225571116}
+  cpsUpgradeButton: {fileID: 246569294}
+  coinIncomeUpgradeButton: {fileID: 1015128064}
+  manaIncomeUpgradeButton: {fileID: 1408850101}
 --- !u!4 &914499734
 Transform:
   m_ObjectHideFlags: 0
@@ -2501,6 +2545,7 @@ GameObject:
   - component: {fileID: 1015128062}
   - component: {fileID: 1015128061}
   - component: {fileID: 1015128060}
+  - component: {fileID: 1015128064}
   m_Layer: 5
   m_Name: CoinInocmeUpgradeButton
   m_TagString: Untagged
@@ -2552,9 +2597,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyCoinIncomeUpgrade
+      - m_Target: {fileID: 1015128064}
+        m_TargetAssemblyTypeName: IncomeUpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2611,7 +2656,7 @@ RectTransform:
   m_GameObject: {fileID: 1015128059}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1654610635}
@@ -2620,8 +2665,23 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -1395, y: 54}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 300, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1015128064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1015128059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ac0a28751be046ada2d00135eb3a813, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IncomeUpgradeButton
+  button: {fileID: 1015128060}
+  labelText: {fileID: 1654610633}
+  resourceType: 0
 --- !u!1 &1046358452
 GameObject:
   m_ObjectHideFlags: 0
@@ -2835,6 +2895,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca0535fddb0724c4c909256f7cb53b14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeManager
+  upgradeDefinitions:
+  - {fileID: 11400000, guid: fa6761b3038804054a2f1533737ee8f8, type: 2}
+  - {fileID: 11400000, guid: a94efcebad48c416baa1b0fb4054b1d2, type: 2}
+  - {fileID: 11400000, guid: 016cbb7d1f28f4dcfbd3174e5e6c8120, type: 2}
+  - {fileID: 11400000, guid: fd9f072f57b5b441eafb3d5f0e2466f3, type: 2}
+  - {fileID: 11400000, guid: 3df6a041f51cf4dc394c958c3a52a4a1, type: 2}
+  - {fileID: 11400000, guid: 0a4f3539ec85947d2bdbbfaacb120e3b, type: 2}
+  - {fileID: 11400000, guid: be19208b999d14cb19a337ed27f2877d, type: 2}
+  - {fileID: 11400000, guid: 184a410337f4a4382817891b0a2deb43, type: 2}
+  - {fileID: 11400000, guid: 0823c73033b164bd4be62d877c5e7878, type: 2}
+  - {fileID: 11400000, guid: 5bee262aad5f14f838cdccf8027dcb14, type: 2}
+  - {fileID: 11400000, guid: 5235e7a1e7c31489086dd09d10ab0faa, type: 2}
   upgrades: []
 --- !u!1 &1161162596
 GameObject:
@@ -2847,6 +2919,7 @@ GameObject:
   - component: {fileID: 1161162598}
   - component: {fileID: 1161162597}
   - component: {fileID: 1161162599}
+  - component: {fileID: 1161162600}
   m_Layer: 0
   m_Name: Castle
   m_TagString: Player
@@ -2974,6 +3047,21 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &1161162600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1161162596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abedce85272674166a185f51dd13637a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CastleManager
+  maxCastleHealth: 100
+  currentCastleHealth: 0
+  gameOver: 0
 --- !u!1 &1179926333
 GameObject:
   m_ObjectHideFlags: 0
@@ -3003,6 +3091,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abbcbf917c780894a94820dc3a2e5a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResourceManager
+  coinsPerSecond: 1
+  cpsLevel: 0
+  cpsBaseCost: 20
+  cpsCostGrowth: 1.17
+  cpsGainPerLevel: 1
+  manaPerSecond: 1
 --- !u!4 &1179926335
 Transform:
   m_ObjectHideFlags: 0
@@ -3061,6 +3155,7 @@ GameObject:
   - component: {fileID: 1408850100}
   - component: {fileID: 1408850099}
   - component: {fileID: 1408850098}
+  - component: {fileID: 1408850101}
   m_Layer: 5
   m_Name: ManaIncomeUpgradeButton
   m_TagString: Untagged
@@ -3077,7 +3172,7 @@ RectTransform:
   m_GameObject: {fileID: 1408850096}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1759644281}
@@ -3086,7 +3181,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -1395, y: -75}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 300, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1408850098
 MonoBehaviour:
@@ -3132,9 +3227,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyManaIncomeUpgrade
+      - m_Target: {fileID: 1408850101}
+        m_TargetAssemblyTypeName: IncomeUpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3182,6 +3277,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1408850096}
   m_CullTransparentMesh: 1
+--- !u!114 &1408850101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1408850096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ac0a28751be046ada2d00135eb3a813, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IncomeUpgradeButton
+  button: {fileID: 1408850098}
+  labelText: {fileID: 1759644282}
+  resourceType: 1
 --- !u!1 &1442178441
 GameObject:
   m_ObjectHideFlags: 0
@@ -3920,8 +4030,9 @@ GameObject:
   - component: {fileID: 1830090869}
   - component: {fileID: 1830090868}
   - component: {fileID: 1830090870}
+  - component: {fileID: 1830090871}
   m_Layer: 5
-  m_Name: DamageUpgradeButton
+  m_Name: CastleDamageButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4029,9 +4140,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyCastleDamage
+      - m_Target: {fileID: 1830090871}
+        m_TargetAssemblyTypeName: UpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4041,6 +4152,21 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1830090871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830090866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e1ff33585324339ae606ec7bca340a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeButton
+  button: {fileID: 1830090870}
+  labelText: {fileID: 1442178442}
+  effectType: 1
 --- !u!1 &2049370666
 GameObject:
   m_ObjectHideFlags: 0
@@ -4067,7 +4193,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2049370666}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9cd788c21deb43448a421d06a2da6177, type: 3}
+  m_Script: {fileID: 11500000, guid: 316f2959a72b3477db1a17f112fbf40e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneContainers
   enemies: {fileID: 1063232229}
@@ -4375,8 +4501,9 @@ GameObject:
   - component: {fileID: 2077179215}
   - component: {fileID: 2077179214}
   - component: {fileID: 2077179216}
+  - component: {fileID: 2077179217}
   m_Layer: 5
-  m_Name: LavaUpgradeButton
+  m_Name: LavaDamageButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4484,9 +4611,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyLavaDamage
+      - m_Target: {fileID: 2077179217}
+        m_TargetAssemblyTypeName: UpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4496,6 +4623,21 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &2077179217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077179212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e1ff33585324339ae606ec7bca340a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeButton
+  button: {fileID: 2077179216}
+  labelText: {fileID: 480655992}
+  effectType: 6
 --- !u!1 &2136036318
 GameObject:
   m_ObjectHideFlags: 0
@@ -4508,6 +4650,7 @@ GameObject:
   - component: {fileID: 2136036321}
   - component: {fileID: 2136036320}
   - component: {fileID: 2136036322}
+  - component: {fileID: 2136036323}
   m_Layer: 5
   m_Name: TurretDamageButton
   m_TagString: Untagged
@@ -4617,9 +4760,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 914499733}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: OnClick_BuyTurretDamage
+      - m_Target: {fileID: 2136036323}
+        m_TargetAssemblyTypeName: UpgradeButton, Assembly-CSharp
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4629,6 +4772,21 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &2136036323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136036318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e1ff33585324339ae606ec7bca340a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeButton
+  button: {fileID: 2136036322}
+  labelText: {fileID: 743290838}
+  effectType: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

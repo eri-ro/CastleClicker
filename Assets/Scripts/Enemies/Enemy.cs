@@ -64,6 +64,9 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
+        if (CastleManager.Instance.gameOver)
+            return;
+
         HandleBehaviorByType();
         HandleBurn();
         UpdateVisuals();
@@ -197,7 +200,7 @@ public class Enemy : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        GameManager.Instance.DamageCastle(castleDamage);
+        CastleManager.Instance.DamageCastle(castleDamage);
         Destroy(gameObject);
     }
 }

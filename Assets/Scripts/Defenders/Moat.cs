@@ -67,7 +67,7 @@ public class Moat : MonoBehaviour
                     e.ResetSpeedMultiplier();
 
                 if (moatType == MoatType.Lava && !e.ignoresMoatBurn)
-                    e.SetBurnDps((float)GameManager.Instance.lavaMoatDps);
+                    e.SetBurnDps((float)UpgradeManager.Instance.GetLavaMoatDps());
                 else
                     e.SetBurnDps(0f);
             }

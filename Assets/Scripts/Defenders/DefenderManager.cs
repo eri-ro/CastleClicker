@@ -20,6 +20,8 @@ public class DefenderManager : MonoBehaviour
             defendersOwned[type] = 0;
             defenderDamage[type] = 0.0;
         }
+
+        defendersOwned[DefenderType.CastleCannon] = 1;
     }
 
     public void AddDefender(DefenderType type, int amount = 1)
