@@ -1,6 +1,8 @@
+using System.Text;
 using TMPro;
 using UnityEngine;
 
+// HUD: coins, mana, castle HP, defender summary.
 public class GameplayUI : MonoBehaviour
 {
     [Header("Resources")]
@@ -27,25 +29,42 @@ public class GameplayUI : MonoBehaviour
 
     public void Refresh()
     {
-        coinsText.text = "Coins: " + FormatUtils.FormatNumber(ResourceManager.Instance.GetResource(ResourceType.Coins));
-        cpsText.text = "CPS: " + FormatUtils.FormatNumber(ResourceManager.Instance.GetCoinsPerSecond());
-        manaText.text = "Mana: " + FormatUtils.FormatNumber(ResourceManager.Instance.GetResource(ResourceType.Mana));
+        coinsText.text = "Coins:\n" + FormatUtils.FormatNumber(ResourceManager.Instance.GetResource(ResourceType.Coins));
+        cpsText.text = "CPS:\n" + FormatUtils.FormatNumber(ResourceManager.Instance.GetCoinsPerSecond());
+        manaText.text = "Mana:\n" + FormatUtils.FormatNumber(ResourceManager.Instance.GetResource(ResourceType.Mana));
         castleHealthText.text =
-            "Castle HP: " + CastleManager.Instance.currentCastleHealth + " / " + CastleManager.Instance.maxCastleHealth;
+            "Castle HP:\n" + CastleManager.Instance.currentCastleHealth + " / " + CastleManager.Instance.maxCastleHealth;
 
         int cannon = DefenderManager.Instance.GetCount(DefenderType.CastleCannon);
         int turrets = DefenderManager.Instance.GetCount(DefenderType.Turret);
         int moat = DefenderManager.Instance.GetCount(DefenderType.Moat);
-        int knights = DefenderManager.Instance.GetCount(DefenderType.Knight);
+        int moatMonsters = DefenderManager.Instance.GetCount(DefenderType.MoatMonster);
         double cannonDmg = DefenderManager.Instance.GetDamage(DefenderType.CastleCannon);
         double turretDmg = DefenderManager.Instance.GetDamage(DefenderType.Turret);
         double moatDmg = DefenderManager.Instance.GetDamage(DefenderType.Moat);
-        double knightDmg = DefenderManager.Instance.GetDamage(DefenderType.Knight);
-        defenderText.text =
-            "Defenders" +
-            "\nCannon: " + cannon + " | Dmg: " + FormatUtils.FormatNumber(cannonDmg) +
-            "\nTurrets: " + turrets + " | Dmg: " + FormatUtils.FormatNumber(turretDmg) +
-            "\nMoat: " + moat + " | DPS: " + FormatUtils.FormatNumber(moatDmg) +
-            "\nKnights: " + knights + " | Dmg: " + FormatUtils.FormatNumber(knightDmg);
+        double moatMonsterDmg = DefenderManager.Instance.GetDamage(DefenderType.MoatMonster);
+
+        var sb = new StringBuilder();
+        sb.AppendLine("Defenders");
+        sb.Append("Cannon: ").Append(cannon).Append(" | Dmg: ").AppendLine(FormatUtils.FormatNumber(cannonDmg));
+        if (turrets > 0)
+            sb.Append("Turrets: ").Append(turrets).Append(" | Dmg: ").AppendLine(FormatUtils.FormatNumber(turretDmg));
+        if (moat > 0)
+            sb.Append("Moat: ").Append(moat).Append(" | DPS: ").AppendLine(FormatUtils.FormatNumber(moatDmg));
+        if (moatMonsters > 0)
+            sb.Append("Moat monsters: ").Append(moatMonsters).Append(" | Dmg: ").AppendLine(FormatUtils.FormatNumber(moatMonsterDmg));
+        defenderText.text = sb.ToString().TrimEnd();
+    }
+}
+
+// Shared number text for HUD, shop, waves, and stats (small values as integers; huge ones in scientific notation).
+public static class FormatUtils
+{
+    public static string FormatNumber(double value)
+    {
+        if (value < 100000)
+            return Mathf.FloorToInt((float)value).ToString();
+
+        return value.ToString("0.###e0");
     }
 }

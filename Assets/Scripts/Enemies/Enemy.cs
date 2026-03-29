@@ -1,5 +1,5 @@
 using UnityEngine;
-
+// Enemy unit: moves toward the castle, can burn, drops coins when killed.
 public class Enemy : MonoBehaviour
 {
     public enum EnemyType
@@ -162,22 +162,41 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
+        TakeDamage(amount, out _, out _);
+    }
+
+    public void TakeDamage(int amount, out bool killed, out double goldEarnedIfKill)
+    {
+        killed = false;
+        goldEarnedIfKill = 0;
         if (amount <= 0) return;
+
+        GameStatsTracker.Instance.RecordDamageDealt(amount);
 
         hp -= amount;
 
         if (hp <= 0)
+        {
+            killed = true;
+            goldEarnedIfKill = GetCoinRewardValue();
             Die();
+        }
+    }
+
+    public double GetCoinRewardValue()
+    {
+        double reward = coinReward;
+        if (isMassiveWaveEnemy)
+            reward += massiveWaveBonusReward;
+        reward *= LegacyManager.Instance.GetEnemyCoinDropMultiplier();
+        return reward;
     }
 
     void Die()
     {
-        double reward = coinReward;
+        GameStatsTracker.Instance.RecordEnemyKilled();
 
-        if (isMassiveWaveEnemy)
-            reward += massiveWaveBonusReward;
-
-        GameManager.Instance.AddCoins(reward);
+        GameManager.Instance.AddCoins(GetCoinRewardValue());
         Destroy(gameObject);
     }
 

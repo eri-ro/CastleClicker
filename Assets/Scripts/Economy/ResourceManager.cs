@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
+// Handles coins, mana, and passive income each second
 public class ResourceManager : MonoBehaviour
 {
     public static ResourceManager Instance { get; private set; }
@@ -23,6 +23,12 @@ public class ResourceManager : MonoBehaviour
 
     float passiveResourceTimer;
 
+    readonly ResourceGenerator[] passiveGenerators =
+    {
+        new GoldMineGenerator(),
+        new ManaWellGenerator()
+    };
+
     private void Awake()
     {
         Instance = this;
@@ -37,8 +43,24 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        ApplyLegacyBonuses();
+    }
+
+    void ApplyLegacyBonuses()
+    {
+        LegacyManager lm = LegacyManager.Instance;
+        AddResource(ResourceType.Coins, lm.GetStartingCoinsBonus());
+        manaPerSecond += lm.GetStartingManaPerSecBonus();
+        coinsPerSecond += lm.GetStartingCpsBonus();
+        OnResourcePerSecondChanged?.Invoke();
+    }
+
     void Update()
     {
+        if (!GameManager.Instance.gameStarted)
+            return;
         if (CastleManager.Instance.gameOver)
             return;
 
@@ -46,8 +68,12 @@ public class ResourceManager : MonoBehaviour
         if (passiveResourceTimer >= 1f)
         {
             passiveResourceTimer -= 1f;
-            AddResource(ResourceType.Coins, coinsPerSecond);
-            AddResource(ResourceType.Mana, manaPerSecond);
+            double coinTick = 0;
+            double manaTick = 0;
+            for (int i = 0; i < passiveGenerators.Length; i++)
+                passiveGenerators[i].Produce(ref coinTick, ref manaTick);
+            AddResource(ResourceType.Coins, coinTick);
+            AddResource(ResourceType.Mana, manaTick);
         }
     }
 
@@ -75,6 +101,8 @@ public class ResourceManager : MonoBehaviour
         }
 
         resources[resourceType] -= amount;
+        if (resourceType == ResourceType.Coins)
+            GameStatsTracker.Instance.RecordCoinsSpent(amount);
         RaiseResourceChanged(resourceType);
         return true;
     }
@@ -82,17 +110,6 @@ public class ResourceManager : MonoBehaviour
     public double GetResource(ResourceType resourceType)
     {
         return resources[resourceType];
-    }
-
-    public void SetResource(ResourceType resourceType, double amount)
-    {
-        if (amount < 0.0)
-        {
-            amount = 0.0;
-        }
-
-        resources[resourceType] = amount;
-        RaiseResourceChanged(resourceType);
     }
 
     private void RaiseResourceChanged(ResourceType resourceType)
@@ -118,12 +135,6 @@ public class ResourceManager : MonoBehaviour
     public void SetCoinsPerSecond(double value)
     {
         coinsPerSecond = value;
-        OnResourcePerSecondChanged?.Invoke();
-    }
-
-    public void AddToCoinsPerSecond(double amount)
-    {
-        coinsPerSecond += amount;
         OnResourcePerSecondChanged?.Invoke();
     }
 
@@ -160,9 +171,21 @@ public class ResourceManager : MonoBehaviour
         OnResourcePerSecondChanged?.Invoke();
     }
 
-    public void AddToManaPerSecond(double amount)
+    public void ResetForNewGame()
     {
-        manaPerSecond += amount;
+        resources[ResourceType.Coins] = 0;
+        resources[ResourceType.Mana] = 0;
+        coinsPerSecond = 1;
+        cpsLevel = 0;
+        manaPerSecond = 1;
+
+        LegacyManager lm = LegacyManager.Instance;
+        AddResource(ResourceType.Coins, lm.GetStartingCoinsBonus());
+        manaPerSecond += lm.GetStartingManaPerSecBonus();
+        coinsPerSecond += lm.GetStartingCpsBonus();
+
+        RaiseResourceChanged(ResourceType.Coins);
+        RaiseResourceChanged(ResourceType.Mana);
         OnResourcePerSecondChanged?.Invoke();
     }
 }

@@ -1,5 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
-
+// Ring under the castle: water or lava visuals and burn damage on enemies.
 [RequireComponent(typeof(LineRenderer))]
 public class Moat : MonoBehaviour
 {
@@ -48,7 +49,7 @@ public class Moat : MonoBehaviour
 
         EnemyRegistry.Instance.CleanupNulls();
 
-        var enemies = EnemyRegistry.Instance.activeEnemies;
+        List<Enemy> enemies = EnemyRegistry.Instance.activeEnemies;
         if (enemies.Count == 0) return;
 
         for (int i = 0; i < enemies.Count; i++)

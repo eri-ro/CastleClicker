@@ -1,7 +1,8 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-
+using UnityEngine.Serialization;
+// Spawns waves, scales difficulty, and hands out wave rewards.
 public class EnemySpawner : MonoBehaviour
 {
     [Header("Enemy Prefabs")]
@@ -13,11 +14,13 @@ public class EnemySpawner : MonoBehaviour
     public Transform castleTarget;
 
     [Header("Endless Spawn")]
+    [SerializeField] float initialSpawnInterval = 1.0f;
     public float baseSpawnInterval = 1.0f;
     public float spawnRadius = 8f;
 
     [Header("Massive Wave")]
     public int massiveWaveSize = 15;
+    [SerializeField] int initialMassiveWaveSize = 15;
     public float timeBetweenMassiveWaves = 30f;
     public float timeBetweenWaveSpawns = 0.15f;
 
@@ -40,8 +43,9 @@ public class EnemySpawner : MonoBehaviour
     public float defenderPowerPerTurret = 0.5f;
     [Tooltip("Power added when lava moat is unlocked.")]
     public float defenderPowerLavaMoat = 1.5f;
-    [Tooltip("Power per knight owned.")]
-    public float defenderPowerPerKnight = 0.35f;
+    [Tooltip("Power per moat monster owned.")]
+    [FormerlySerializedAs("defenderPowerPerKnight")]
+    public float defenderPowerPerMoatMonster = 0.35f;
     [Tooltip("Power from cannon (always 1).")]
     public float defenderPowerCannon = 0.2f;
     [Tooltip("If true, enemies deal more damage to the castle when you have more defenders.")]
@@ -52,6 +56,7 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Wave Rewards")]
     public double waveClearReward = 25;
+    [SerializeField] double initialWaveClearReward = 25;
     public double waveClearRewardGrowth = 1.25;
 
     [Header("Wave UI")]
@@ -82,6 +87,11 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
+        if (!GameManager.Instance.gameStarted)
+        {
+            waveStatusText.text = "";
+            return;
+        }
         if (CastleManager.Instance.gameOver)
         {
             waveStatusText.text = "Game Over";
@@ -122,13 +132,12 @@ public class EnemySpawner : MonoBehaviour
 
     float GetDefenderPower()
     {
-        if (UpgradeManager.Instance == null) return 0f;
-        var up = UpgradeManager.Instance;
+        UpgradeManager up = UpgradeManager.Instance;
         float power = defenderPowerCannon;
         power += up.GetTurretCount() * defenderPowerPerTurret;
         if (up.IsLavaMoatPurchased())
             power += defenderPowerLavaMoat;
-        power += up.GetKnightCount() * defenderPowerPerKnight;
+        power += up.GetMoatMonsterCount() * defenderPowerPerMoatMonster;
         return power;
     }
 
@@ -257,8 +266,10 @@ public class EnemySpawner : MonoBehaviour
             currentWaveModifier = WaveModifier.None;
             clearedMessageTimer = clearedMessageDuration;
 
-            GameManager.Instance.AddCoins(waveClearReward);
-            waveStatusText.text = "Wave Cleared! +" + FormatWaveReward(waveClearReward) + " Coins";
+            double reward = waveClearReward;
+            reward *= LegacyManager.Instance.GetWaveRewardMultiplier();
+            GameManager.Instance.AddCoins(reward);
+            waveStatusText.text = "Wave Survived! +" + FormatWaveReward(reward) + " Coins";
         }
     }
 
@@ -353,5 +364,23 @@ public class EnemySpawner : MonoBehaviour
     string FormatWaveReward(double value)
     {
         return FormatUtils.FormatNumber(value);
+    }
+
+    public void ResetForNewGame()
+    {
+        hpMultiplier = 1f;
+        baseSpawnInterval = initialSpawnInterval;
+        massiveWaveSize = initialMassiveWaveSize;
+        waveClearReward = initialWaveClearReward;
+        waveRewardGranted = false;
+        waveActive = false;
+        spawningMassiveWave = false;
+        spawnTimer = 0f;
+        elapsedTime = 0f;
+        waveTimer = 0f;
+        scalingTimer = 0f;
+        clearedMessageTimer = 0f;
+        currentWaveModifier = WaveModifier.None;
+        waveStatusText.text = "";
     }
 }

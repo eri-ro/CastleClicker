@@ -1,5 +1,5 @@
 using UnityEngine;
-
+// Gentle bob/sway on the enemy sprite (cosmetic).
 public class EnemyBob : MonoBehaviour
 {
     public float bobHeight = 0.05f;

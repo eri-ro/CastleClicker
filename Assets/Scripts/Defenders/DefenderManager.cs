@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
+// Counts each defense type and stores damage numbers the UI and shots read.
 public class DefenderManager : MonoBehaviour
 {
     public static DefenderManager Instance { get; private set; }
@@ -30,12 +30,6 @@ public class DefenderManager : MonoBehaviour
         OnDefendersChanged?.Invoke();
     }
 
-    public void SetDefenderCount(DefenderType type, int amount)
-    {
-        defendersOwned[type] = amount;
-        OnDefendersChanged?.Invoke();
-    }
-
     public int GetCount(DefenderType type)
     {
         return defendersOwned[type];
@@ -49,5 +43,16 @@ public class DefenderManager : MonoBehaviour
     public double GetDamage(DefenderType type)
     {
         return defenderDamage[type];
+    }
+
+    public void ResetForNewGame()
+    {
+        foreach (DefenderType type in System.Enum.GetValues(typeof(DefenderType)))
+        {
+            defendersOwned[type] = 0;
+            defenderDamage[type] = 0.0;
+        }
+        defendersOwned[DefenderType.CastleCannon] = 1;
+        OnDefendersChanged?.Invoke();
     }
 }

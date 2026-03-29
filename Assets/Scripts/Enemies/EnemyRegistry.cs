@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-
+// List of all living enemies so turrets and splash can find targets.
 public class EnemyRegistry : MonoBehaviour
 {
     public static EnemyRegistry Instance { get; private set; }

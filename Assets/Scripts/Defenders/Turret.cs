@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-
+// Auto-turret: shoots the nearest enemy on a timer.
 public class Turret : MonoBehaviour
 {
     public Projectile projectilePrefab;
@@ -27,7 +27,7 @@ public class Turret : MonoBehaviour
 
         int dmg = Mathf.Max(1, Mathf.RoundToInt((float)DefenderManager.Instance.GetDamage(DefenderType.Turret)));
 
-        projectile.Initialize(dir, dmg);
+        projectile.Initialize(dir, dmg, false, 0f, ProjectileDamageProfile.Turret);
     }
 
     Enemy FindNearestEnemyInRange()

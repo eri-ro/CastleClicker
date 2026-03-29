@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-
+// Castle hit points; fires game over when health reaches zero.
 public class CastleManager : MonoBehaviour
 {
     public static CastleManager Instance { get; private set; }
@@ -20,6 +20,8 @@ public class CastleManager : MonoBehaviour
 
     void Start()
     {
+        int bonus = LegacyManager.Instance.GetStartingCastleHealthBonus();
+        maxCastleHealth = 100 + bonus;
         currentCastleHealth = maxCastleHealth;
         gameOver = false;
     }
@@ -43,5 +45,14 @@ public class CastleManager : MonoBehaviour
         gameOver = true;
         OnGameOver?.Invoke();
         Debug.Log("Game Over");
+    }
+
+    public void ResetForNewGame()
+    {
+        int bonus = LegacyManager.Instance.GetStartingCastleHealthBonus();
+        maxCastleHealth = 100 + bonus;
+        currentCastleHealth = maxCastleHealth;
+        gameOver = false;
+        OnCastleHealthChanged?.Invoke();
     }
 }
