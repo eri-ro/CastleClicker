@@ -212,6 +212,7 @@ public class EnemySpawner : MonoBehaviour
             SceneContainers.Instance.enemies
         );
 
+        enemy.ApplyStatsFromXmlFile();
         enemy.target = castleTarget;
         float hpScale = hpMultiplier * GetDefenderHpMultiplier();
         enemy.hp = Mathf.Max(1, Mathf.RoundToInt(enemy.hp * hpScale));
@@ -344,7 +345,7 @@ public class EnemySpawner : MonoBehaviour
 
             case WaveModifier.Flying:
                 enemy.enemyType = Enemy.EnemyType.FastFlying;
-                enemy.ApplyTypeDefaults();
+                enemy.ApplyMoatTraitsOnlyFromXmlOrEnum();
                 enemy.speed *= 1.2f;
                 break;
 

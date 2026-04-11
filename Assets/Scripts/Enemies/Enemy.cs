@@ -32,6 +32,8 @@ public class Enemy : MonoBehaviour
     public bool isMassiveWaveEnemy = false;
     public double massiveWaveBonusReward = 2;
 
+    bool appliedStatsFromXmlFile;
+
     float baseSpeed;
     float speedMultiplier = 1f;
     float burnAccumulator = 0f;
@@ -59,7 +61,35 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         baseSpeed = speed;
-        ApplyTypeDefaults();
+        if (!appliedStatsFromXmlFile)
+            ApplyTraitDefaultsFromEnum();
+    }
+
+    // EnemySpawner calls this after Instantiate; stats come from the XML-loaded dictionary.
+    public void ApplyStatsFromXmlFile()
+    {
+        if (!EnemyTypeStatsRegistry.TryGet(enemyType, out EnemyTypeXmlEntry row))
+            return;
+
+        hp = row.hp;
+        speed = row.speed;
+        coinReward = row.coinReward;
+        castleDamage = row.castleDamage;
+        ignoresMoatSlow = row.ignoresMoatSlow;
+        ignoresMoatBurn = row.ignoresMoatBurn;
+        appliedStatsFromXmlFile = true;
+    }
+
+    // Flying wave: switch to FastFlying moat flags only; keep current HP/coins (no full XML re-apply).
+    public void ApplyMoatTraitsOnlyFromXmlOrEnum()
+    {
+        if (EnemyTypeStatsRegistry.TryGet(enemyType, out EnemyTypeXmlEntry row))
+        {
+            ignoresMoatSlow = row.ignoresMoatSlow;
+            ignoresMoatBurn = row.ignoresMoatBurn;
+        }
+        else
+            ApplyTraitDefaultsFromEnum();
     }
 
     void Update()
@@ -72,7 +102,7 @@ public class Enemy : MonoBehaviour
         UpdateVisuals();
     }
 
-    public void ApplyTypeDefaults()
+    void ApplyTraitDefaultsFromEnum()
     {
         switch (enemyType)
         {

@@ -48,6 +48,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        EnemyTypeStatsRegistry.LoadFromXml();
     }
 
     void Start()

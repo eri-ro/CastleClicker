@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<EnemyTypes xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Enemy type="Basic" hp="2" speed="1.5" coinReward="1" castleDamage="1" ignoresMoatSlow="false" ignoresMoatBurn="false" />
+  <Enemy type="FastFlying" hp="1" speed="3" coinReward="2" castleDamage="2" ignoresMoatSlow="true" ignoresMoatBurn="true" />
+  <Enemy type="Tank" hp="10" speed="0.9" coinReward="4" castleDamage="4" ignoresMoatSlow="false" ignoresMoatBurn="false" />
+</EnemyTypes>
