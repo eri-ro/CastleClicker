@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Hit one enemy, then splash damage nearby (magic-style).
+// Hit one enemy, then splash damage nearby
 public sealed class MageTower : TowerBase
 {
     readonly int primaryDamage;
