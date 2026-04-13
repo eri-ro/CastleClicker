@@ -734,9 +734,9 @@ MonoBehaviour:
   castleTransform: {fileID: 1161162598}
   moatPrefab: {fileID: 3677329343708216962, guid: c0ae20c1dd79a454cb29608e8f257ade, type: 3}
   moatMonsterPrefab: {fileID: 2413839924605531057, guid: fdde8730b112d024cb81e2cf410786e2, type: 3}
-  enemySpawner: {fileID: 313589963}
   moatMonsterOrbitRadius: 2
   moatMonsterOrbitSpeed: 1.5707964
+  enemySpawner: {fileID: 313589963}
   mainMenuUI: {fileID: 730408810}
   gameStarted: 0
 --- !u!4 &125429739
@@ -5705,6 +5705,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 922599607}
   m_CullTransparentMesh: 1
+--- !u!1 &927952502
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 927952503}
+  - component: {fileID: 927952504}
+  m_Layer: 0
+  m_Name: SaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &927952503
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 927952502}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 999117880}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &927952504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 927952502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5ee4ef388a1f234d82554bfd0914d2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveManager
+  fileName: playtime
 --- !u!1 &944210364
 GameObject:
   m_ObjectHideFlags: 0
@@ -5725,18 +5770,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!225 &944210369
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944210364}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!114 &944210365
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5818,6 +5851,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 944210364}
   m_CullTransparentMesh: 1
+--- !u!225 &944210369
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 944210364}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &945394151
 GameObject:
   m_ObjectHideFlags: 0
@@ -6384,6 +6429,7 @@ Transform:
   - {fileID: 1786023554}
   - {fileID: 1341292389}
   - {fileID: 24368401}
+  - {fileID: 927952503}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1013328788
