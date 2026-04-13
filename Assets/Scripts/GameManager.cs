@@ -221,6 +221,7 @@ public class GameManager : MonoBehaviour
         DefenderManager.Instance.ResetForNewGame();
         SyncDefenderStats();
         NotifyUIChanged();
+        SaveManager.instance.LoadJson();
     }
 
     void ClearSpawnedDefenders()
