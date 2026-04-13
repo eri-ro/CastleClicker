@@ -41,6 +41,7 @@ public class ResourceManager : MonoBehaviour
         {
             resources[resourceType] = 0.0;
         }
+
     }
 
     void Start()
