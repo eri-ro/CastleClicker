@@ -67,39 +67,29 @@ public class SaveManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"Save Manager was unable to save due to: {e.Message} {e.StackTrace}");
+            throw new ArgumentException($"Save Manager was unable to save due to: {e.Message} {e.StackTrace}");
         }
     }
 
     public PlayerData LoadJson()
     {
-        try
+        if (!File.Exists(jsonPath))
         {
-            string json = File.ReadAllText(jsonPath);
-            PlayerData data = JsonUtility.FromJson<PlayerData>(json);
-
-            ResourceManager.Instance.SetCoinsPerSecond(data.coinsPerSecond);
-            ResourceManager.Instance.cpsLevel = data.cpsLevel;
-            ResourceManager.Instance.cpsBaseCost = data.cpsBaseCost;
-            ResourceManager.Instance.cpsCostGrowth = data.cpsCostGrowth;
-            ResourceManager.Instance.cpsGainPerLevel = data.cpsGainPerLevel;
-            ResourceManager.Instance.SetManaPerSecond(data.manaPerSecond);
-
-            Debug.Log("Loaded from: " + jsonPath);
-            return data;
-        }
-        catch (Exception e)
-        {
-            if (e.Message.Contains("does not exist")) // Means save file doesn't exist yet because the player hasn't saved a game yet
-            {
-                Debug.Log("No existing file to load from!");
-                return null;
-            }
-            else
-            {
-                throw new ArgumentException($"Save Manager unable to load due to {e.Message} {e.StackTrace}");
-            }
+            Debug.Log("No save file found");
+            return null;
         }
 
+        string json = File.ReadAllText(jsonPath);
+        PlayerData data = JsonUtility.FromJson<PlayerData>(json);
+
+        ResourceManager.Instance.SetCoinsPerSecond(data.coinsPerSecond);
+        ResourceManager.Instance.cpsLevel = data.cpsLevel;
+        ResourceManager.Instance.cpsBaseCost = data.cpsBaseCost;
+        ResourceManager.Instance.cpsCostGrowth = data.cpsCostGrowth;
+        ResourceManager.Instance.cpsGainPerLevel = data.cpsGainPerLevel;
+        ResourceManager.Instance.SetManaPerSecond(data.manaPerSecond);
+
+        Debug.Log("Loaded from: " + jsonPath);
+        return data;
     }
 }
