@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -62,6 +63,13 @@ public class GameManager : MonoBehaviour
 
         SyncDefenderStats();
         NotifyUIChanged();
+
+        SaveManager.instance.OnSaveFailed += OnSaveFailedFromSaveManager;
+    }
+
+    void OnSaveFailedFromSaveManager(string message)
+    {
+        Debug.LogWarning("[SaveManager] " + message);
     }
 
     void OnGameOver()
@@ -221,7 +229,6 @@ public class GameManager : MonoBehaviour
         DefenderManager.Instance.ResetForNewGame();
         SyncDefenderStats();
         NotifyUIChanged();
-        SaveManager.instance.LoadJson();
     }
 
     void ClearSpawnedDefenders()
@@ -262,6 +269,8 @@ public class GameManager : MonoBehaviour
 
     void OnDestroy()
     {
+        SaveManager.instance.OnSaveFailed -= OnSaveFailedFromSaveManager;
+
         ResourceManager.Instance.OnResourceChanged -= OnResourceChanged;
         ResourceManager.Instance.OnResourcePerSecondChanged -= OnResourcePerSecondChanged;
         CastleManager.Instance.OnCastleHealthChanged -= OnCastleHealthOrGameOverChanged;
