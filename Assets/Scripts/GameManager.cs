@@ -229,15 +229,6 @@ public class GameManager : MonoBehaviour
         DefenderManager.Instance.ResetForNewGame();
         SyncDefenderStats();
         NotifyUIChanged();
-
-        try
-        {
-            SaveManager.instance.LoadJson();
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning("StartNewGame: could not apply CPS save — " + e.Message);
-        }
     }
 
     void ClearSpawnedDefenders()
