@@ -1,28 +1,29 @@
 using UnityEngine;
 using System;
 using System.IO;
-using UnityEditor;
-using UnityEditor.Overlays;
 
 public class SaveManager : MonoBehaviour
 {
     public static SaveManager instance;
+    //week 14 event
+    public event Action<string> OnSaveFailed;
+
     private void Awake()
     {
         jsonPath = Path.Combine(Application.persistentDataPath, "playerData.json");
         instance = this;
     }
 
+    private void OnDestroy()
+    {
+        if (instance == this)
+            instance = null;
+    }
+
     public string fileName = "Runtime.txt";
     float playTime = 0;
 
     string jsonPath;
-    
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-    }
 
     private void Update()
     {
@@ -31,15 +32,31 @@ public class SaveManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        SaveJson();
-        SaveToFile();
+        try
+        {
+            SaveJson();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"SaveManager: JSON save on quit failed — {e.Message}");
+        }
+
+        try
+        {
+            SaveToFile();
+        }
+        catch (Exception e)
+        {
+            OnSaveFailed?.Invoke($"Session log append failed: {e.Message}");
+            Debug.LogError($"SaveManager: session log append failed — {e.Message}");
+        }
     }
 
     public void SaveToFile()
     {
         string path = Path.Combine(Application.persistentDataPath, fileName);
         int sessionTime = (int)(playTime += 0.5f);
-        
+
         string line = $"Session time: {sessionTime}";
         using (StreamWriter writer = new StreamWriter(path, true))
         {
@@ -67,7 +84,8 @@ public class SaveManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            throw new ArgumentException($"Save Manager was unable to save due to: {e.Message} {e.StackTrace}");
+            OnSaveFailed?.Invoke($"SaveJson failed: {e.Message}");
+            throw;
         }
     }
 
@@ -79,17 +97,27 @@ public class SaveManager : MonoBehaviour
             return null;
         }
 
-        string json = File.ReadAllText(jsonPath);
-        PlayerData data = JsonUtility.FromJson<PlayerData>(json);
+        try
+        {
+            string json = File.ReadAllText(jsonPath);
+            PlayerData data = JsonUtility.FromJson<PlayerData>(json);
+            if (data == null)
+                throw new InvalidOperationException("playerData.json parsed to null (corrupt or empty).");
 
-        ResourceManager.Instance.SetCoinsPerSecond(data.coinsPerSecond);
-        ResourceManager.Instance.cpsLevel = data.cpsLevel;
-        ResourceManager.Instance.cpsBaseCost = data.cpsBaseCost;
-        ResourceManager.Instance.cpsCostGrowth = data.cpsCostGrowth;
-        ResourceManager.Instance.cpsGainPerLevel = data.cpsGainPerLevel;
-        ResourceManager.Instance.SetManaPerSecond(data.manaPerSecond);
+            ResourceManager.Instance.SetCoinsPerSecond(data.coinsPerSecond);
+            ResourceManager.Instance.cpsLevel = data.cpsLevel;
+            ResourceManager.Instance.cpsBaseCost = data.cpsBaseCost;
+            ResourceManager.Instance.cpsCostGrowth = data.cpsCostGrowth;
+            ResourceManager.Instance.cpsGainPerLevel = data.cpsGainPerLevel;
+            ResourceManager.Instance.SetManaPerSecond(data.manaPerSecond);
 
-        Debug.Log("Loaded from: " + jsonPath);
-        return data;
+            Debug.Log("Loaded from: " + jsonPath);
+            return data;
+        }
+        catch (Exception e)
+        {
+            OnSaveFailed?.Invoke($"LoadJson failed: {e.Message}");
+            throw;
+        }
     }
 }
