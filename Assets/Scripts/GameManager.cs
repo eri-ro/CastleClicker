@@ -7,9 +7,13 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    [Header("Castle")]
+    public Transform castleTransform;
+    [Tooltip("Gameplay background")]
+    public GameObject gameplayBackground;
+
     [Header("Turrets")]
     public Turret turretPrefab;
-    public Transform castleTransform;
 
     [Header("Moat")]
     public Moat moatPrefab;
@@ -84,6 +88,8 @@ public class GameManager : MonoBehaviour
     void SetGameplayWorldVisible(bool visible)
     {
         castleTransform.gameObject.SetActive(visible);
+        if (gameplayBackground != null)
+            gameplayBackground.SetActive(visible);
 
         SceneContainers sc = SceneContainers.Instance;
         sc.enemies.gameObject.SetActive(visible);
@@ -236,7 +242,7 @@ public class GameManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogWarning("StartNewGame: could not apply CPS save — " + e.Message);
+            Debug.LogWarning("StartNewGame: could not apply CPS save ï¿½ " + e.Message);
         }
     }
 
